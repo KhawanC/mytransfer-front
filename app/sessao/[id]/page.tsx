@@ -227,18 +227,37 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         `/api/transferencia/arquivo/${arquivoId}/download`,
       )
       
-      // Força o download ao invés de abrir em nova aba
+      // Buscar informações do arquivo para pegar o nome
+      const arquivo = arquivos.find(a => a.id === arquivoId)
+      const nomeArquivo = arquivo?.nomeOriginal || "download"
+      
+      // Download via fetch para ter controle total e evitar problemas de CORS
+      const response = await fetch(urlDownload)
+      
+      if (!response.ok) {
+        throw new Error("Erro ao baixar arquivo")
+      }
+      
+      // Criar blob a partir da resposta
+      const blob = await response.blob()
+      
+      // Criar URL temporário do blob e forçar download
+      const blobUrl = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
-      link.href = urlDownload
-      link.download = "" // Usa o nome do arquivo do header Content-Disposition
+      link.href = blobUrl
+      link.download = nomeArquivo
       link.style.display = "none"
       document.body.appendChild(link)
       link.click()
-      document.body.removeChild(link)
       
-      toast.success("Download iniciado")
-    } catch {
-      toast.error("Erro ao gerar download")
+      // Limpar
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+      
+      toast.success("Download concluído")
+    } catch (error) {
+      console.error("Erro no download:", error)
+      toast.error("Erro ao baixar arquivo")
     }
   }
 
