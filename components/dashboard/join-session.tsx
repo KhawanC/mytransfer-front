@@ -35,7 +35,7 @@ export function JoinSession({ onJoined }: JoinSessionProps) {
       try {
         const sessao = await api<Sessao>("/api/transferencia/sessao/entrar", {
           method: "POST",
-          body: JSON.stringify({ hashConexao: hashConexao.toUpperCase().replace(/[^A-Z0-9]/g, "") }),
+          body: JSON.stringify({ hashConexao: hashConexao.replace(/\D/g, "") }),
         })
         onJoined(sessao)
         toast.success("Conectado à sessão!")
@@ -60,11 +60,17 @@ export function JoinSession({ onJoined }: JoinSessionProps) {
   }
 
   function handleQrResult(url: string) {
-    const match = url.match(/\/transfer\/([A-Za-z0-9]+)$/)
+    const match = url.match(/\/transfer\/(\d{8})$/)
     if (match) {
       joinSession(match[1])
     } else {
-      joinSession(url)
+      // Fallback: tenta extrair qualquer sequência de 8 dígitos
+      const numericMatch = url.match(/(\d{8})/)
+      if (numericMatch) {
+        joinSession(numericMatch[1])
+      } else {
+        toast.error("Código QR inválido")
+      }
     }
   }
 
@@ -99,10 +105,12 @@ export function JoinSession({ onJoined }: JoinSessionProps) {
           <TabsContent value="hash" className="mt-4">
             <form onSubmit={handleSubmitHash} className="space-y-3">
               <Input
-                placeholder="Ex: A3B4C5D6E7F8A1B2"
+                placeholder="Ex: 12345678"
                 value={hash}
-                onChange={(e) => setHash(e.target.value.toUpperCase())}
-                maxLength={20}
+                onChange={(e) => setHash(e.target.value.replace(/\D/g, ""))}
+                maxLength={8}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 autoFocus
                 className="font-mono text-center tracking-widest text-lg"
               />

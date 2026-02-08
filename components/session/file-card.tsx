@@ -135,10 +135,10 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 cursor-pointer text-primary hover:text-primary"
+              className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-primary hover:text-primary touch-manipulation"
               onClick={() => onDownload(arquivo.id)}
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-5 w-5 md:h-4 md:w-4" />
             </Button>
           )}
 
@@ -149,9 +149,9 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-destructive"
+                  className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-muted-foreground hover:text-destructive touch-manipulation"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5 md:h-4 md:w-4" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-xs">
@@ -191,9 +191,9 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-destructive"
+                  className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-muted-foreground hover:text-destructive touch-manipulation"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-xs">
