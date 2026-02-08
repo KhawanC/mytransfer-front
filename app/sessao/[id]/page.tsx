@@ -226,7 +226,17 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       const { urlDownload } = await api<{ arquivoId: string; urlDownload: string }>(
         `/api/transferencia/arquivo/${arquivoId}/download`,
       )
-      window.open(urlDownload, "_blank")
+      
+      // Força o download ao invés de abrir em nova aba
+      const link = document.createElement("a")
+      link.href = urlDownload
+      link.download = "" // Usa o nome do arquivo do header Content-Disposition
+      link.style.display = "none"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      toast.success("Download iniciado")
     } catch {
       toast.error("Erro ao gerar download")
     }
