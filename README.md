@@ -1,8 +1,8 @@
-# MyTransfer - Frontend
+# MePassa - Frontend
 
 ## 📋 Sobre o Projeto
 
-O **MyTransfer Frontend** é uma aplicação web moderna desenvolvida em Next.js para transferência de arquivos peer-to-peer (P2P) em tempo real. Interface intuitiva e responsiva que permite aos usuários compartilhar arquivos de forma segura através de sessões únicas com QR Code.
+O **MePassa** é uma aplicação web moderna desenvolvida em Next.js para transferência de arquivos peer-to-peer (P2P) em tempo real. Interface intuitiva e responsiva que permite aos usuários compartilhar arquivos de forma segura através de sessões únicas com QR Code.
 
 ## 🎯 Propósito
 
