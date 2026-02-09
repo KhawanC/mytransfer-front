@@ -33,10 +33,10 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="flex items-center gap-2">
             <ArrowLeftRight className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">MyTransfer</h1>
+            <h1 className="text-3xl font-bold tracking-tight">MePassa</h1>
           </div>
           <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-            Conecte-se com seus amigos para transferir arquivos de forma rápida e eficiente
+            Transfira arquivos grandes de forma rápida, segura e sem limites
           </p>
         </div>
 

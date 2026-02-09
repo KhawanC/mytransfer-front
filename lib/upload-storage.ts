@@ -3,7 +3,7 @@
  * Armazena sessões de upload para permitir retomada após refresh da página.
  */
 
-const DB_NAME = "mytransfer-uploads"
+const DB_NAME = "mepassa-uploads"
 const DB_VERSION = 1
 const STORE_NAME = "upload-sessions"
 

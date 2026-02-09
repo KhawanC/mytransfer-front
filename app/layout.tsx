@@ -15,8 +15,21 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "MyTransfer",
-  description: "Conecte-se com seus amigos para transferir arquivos de forma rápida e eficiente",
+  title: "MePassa - Transferência de Arquivos Rápida e Segura",
+  description: "Transfira arquivos grandes entre dispositivos de forma rápida, segura e sem limites. Compartilhe fotos, vídeos e documentos com seus amigos em tempo real.",
+  keywords: ["transferência de arquivos", "compartilhar arquivos", "enviar arquivos grandes", "compartilhamento p2p", "transferência segura"],
+  authors: [{ name: "MePassa" }],
+  openGraph: {
+    title: "MePassa - Transferência de Arquivos Rápida e Segura",
+    description: "Transfira arquivos grandes entre dispositivos de forma rápida, segura e sem limites.",
+    type: "website",
+    locale: "pt_BR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MePassa - Transferência de Arquivos",
+    description: "Transfira arquivos grandes de forma rápida e segura",
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,

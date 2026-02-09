@@ -80,7 +80,7 @@ export function SessionHeader({ session, isCreator, onEndSession, isConnected }:
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <ArrowLeftRight className="h-5 w-5 text-primary" />
-            <span className="font-semibold tracking-tight">MyTransfer</span>
+            <span className="font-semibold tracking-tight">MePassa</span>
           </div>
 
           <div className="flex items-center gap-2">
