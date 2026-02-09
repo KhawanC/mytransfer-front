@@ -126,6 +126,14 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           toast.info("Um usuário entrou na sessão")
           fetchSession()
           break
+        case "HASH_ATUALIZADO": {
+          const dados = notif.dados as { hash: string; expiraEm: string }
+          setSession((prev) => 
+            prev ? { ...prev, hashConexao: dados.hash, hashExpiraEm: dados.expiraEm } : prev
+          )
+          toast.info("Código de conexão atualizado")
+          break
+        }
         case "SESSAO_ENCERRADA":
           toast.info("Sessão encerrada")
           setSession((prev) => (prev ? { ...prev, status: "ENCERRADA" } : prev))

@@ -29,6 +29,7 @@ export interface Sessao {
   totalArquivosTransferidos: number
   criadaEm: string
   expiraEm: string
+  hashExpiraEm?: string
 }
 
 export interface Arquivo {
@@ -84,12 +85,14 @@ export type TipoNotificacao =
   | "USUARIO_SAIU"
   | "SESSAO_ENCERRADA"
   | "SESSAO_EXPIRADA"
+  | "HASH_ATUALIZADO"
   | "UPLOAD_INICIADO"
   | "UPLOAD_PROGRESSO"
   | "UPLOAD_COMPLETO"
   | "UPLOAD_ERRO"
   | "ARQUIVO_DISPONIVEL"
   | "SOLICITACAO_ENTRADA"
+  | "SOLICITACAO_ENTRADA_CRIADOR"
   | "ENTRADA_APROVADA"
   | "ENTRADA_REJEITADA"
 

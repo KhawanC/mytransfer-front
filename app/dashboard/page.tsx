@@ -1,9 +1,11 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/providers/auth-provider"
+import { useWebSocket } from "@/hooks/use-websocket"
 import { api } from "@/lib/api"
-import type { Sessao } from "@/types"
+import type { Sessao, NotificacaoResponse } from "@/types"
 import { CreateSession } from "@/components/dashboard/create-session"
 import { JoinSession } from "@/components/dashboard/join-session"
 import { SessionList } from "@/components/dashboard/session-list"
@@ -11,8 +13,10 @@ import { toast } from "sonner"
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const router = useRouter()
   const [sessions, setSessions] = useState<Sessao[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { isConnected, subscribe } = useWebSocket()
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -28,6 +32,24 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchSessions()
   }, [fetchSessions])
+  
+  useEffect(() => {
+    if (!isConnected || !user) return
+
+    const unsubNotif = subscribe("/queue/notificacoes", (data) => {
+      const notif = data as NotificacaoResponse
+      if (notif.tipo === "SOLICITACAO_ENTRADA_CRIADOR") {
+        const sessaoId = notif.dados as string
+        toast.info(notif.mensagem)
+        // Redireciona o criador para a página da sessão automaticamente
+        router.push(`/sessao/${sessaoId}`)
+      }
+    })
+
+    return () => {
+      unsubNotif()
+    }
+  }, [isConnected, user, subscribe, router])
 
   const handleSessionCreated = useCallback(async (sessao: Sessao) => {
     setSessions((prev) => [sessao, ...prev])
