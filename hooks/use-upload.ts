@@ -22,7 +22,6 @@ import type {
   StatusArquivo 
 } from "@/types"
 
-// Limite de uploads paralelos de chunks
 const PARALLEL_CHUNK_LIMIT = 4
 
 export interface UploadItem {
@@ -77,10 +76,6 @@ export function useUpload(): UseUploadReturn {
     updateUpload(id, { status: "ERRO", error: "Upload cancelado" })
   }, [updateUpload])
 
-  /**
-   * Envia chunks em paralelo usando p-limit para controlar concorrência.
-   * Retorna quando todos os chunks forem enviados ou em caso de erro.
-   */
   const sendChunksInParallel = useCallback(async (
     arquivoId: string,
     sessaoId: string,
@@ -95,7 +90,6 @@ export function useUpload(): UseUploadReturn {
     let hasError = false
 
     const sendChunk = async (chunkIndex: number): Promise<void> => {
-      // Verifica se foi cancelado
       if (cancelledUploads.current.has(arquivoId)) {
         throw new Error("Upload cancelado")
       }
@@ -136,10 +130,6 @@ export function useUpload(): UseUploadReturn {
     }
   }, [])
 
-  /**
-   * Função interna para retomar upload.
-   * Separada para ser chamada tanto por resumeUpload quanto por uploadFile.
-   */
   const resumeUploadInternal = useCallback(
     async (
       file: File, 
@@ -150,11 +140,9 @@ export function useUpload(): UseUploadReturn {
       const arquivoId = persistedSession.arquivoId
 
       try {
-        // Consulta o progresso no servidor
         const progressoResponse = await getUploadProgress(arquivoId)
 
         if (!progressoResponse.uploadValido) {
-          // Upload não é mais válido, remove do IndexedDB
           await removeUploadSession(fingerprint)
           throw new Error("Upload expirado ou inválido")
         }
@@ -163,7 +151,6 @@ export function useUpload(): UseUploadReturn {
         const chunkSize = progressoResponse.chunkSizeBytes
         const chunksRecebidos = new Set(progressoResponse.chunksRecebidos)
         
-        // Calcula chunks faltantes
         const chunksToSend: number[] = []
         for (let i = 0; i < totalChunks; i++) {
           if (!chunksRecebidos.has(i)) {
@@ -173,7 +160,6 @@ export function useUpload(): UseUploadReturn {
 
         const initialProgress = ((totalChunks - chunksToSend.length) / totalChunks) * 100
 
-        // Adiciona ao estado de uploads
         setUploads((prev) => {
           const next = new Map(prev)
           next.set(arquivoId, {
@@ -191,7 +177,6 @@ export function useUpload(): UseUploadReturn {
         })
 
         if (chunksToSend.length === 0) {
-          // Todos os chunks já foram enviados
           updateUpload(arquivoId, { 
             progress: 100, 
             status: "PROCESSANDO",
@@ -201,11 +186,9 @@ export function useUpload(): UseUploadReturn {
           return
         }
 
-        // Lê o arquivo em memória
         const fileBuffer = await file.arrayBuffer()
         const startChunksSent = totalChunks - chunksToSend.length
 
-        // Envia apenas os chunks faltantes em paralelo
         const success = await sendChunksInParallel(
           arquivoId,
           sessaoId,
@@ -241,10 +224,6 @@ export function useUpload(): UseUploadReturn {
     [updateUpload, sendChunksInParallel]
   )
 
-  /**
-   * Upload de arquivo com suporte a resumable.
-   * Calcula fingerprint, persiste sessão no IndexedDB, e envia chunks em paralelo.
-   */
   const uploadFile = useCallback(
     async (file: File, sessaoId: string) => {
       setIsUploading(true)
@@ -252,22 +231,17 @@ export function useUpload(): UseUploadReturn {
       let arquivoId: string = ""
 
       try {
-        // Calcula fingerprint primeiro para verificar se já existe sessão
         fingerprint = await calculateFileFingerprint(file)
         
-        // Verifica se já existe uma sessão para este arquivo
         const existingSession = await getUploadSession(fingerprint)
         if (existingSession && existingSession.sessaoId === sessaoId) {
-          // Tenta retomar o upload existente
           try {
             const progressoResponse = await getUploadProgress(existingSession.arquivoId)
             if (progressoResponse.uploadValido) {
-              // Sessão válida, retoma o upload
               await resumeUploadInternal(file, sessaoId, existingSession, fingerprint)
               return
             }
           } catch {
-            // Sessão não existe mais no servidor, remove do IndexedDB
             await removeUploadSession(fingerprint)
           }
         }
@@ -289,10 +263,8 @@ export function useUpload(): UseUploadReturn {
           return next
         })
 
-        // Calcula hash completo do arquivo
         const hashConteudo = await calculateFullFileHash(file)
 
-        // Inicia o upload no servidor
         const initResponse = await api<IniciarUploadResponse>("/api/transferencia/arquivo/upload", {
           method: "POST",
           body: JSON.stringify({
@@ -306,7 +278,6 @@ export function useUpload(): UseUploadReturn {
 
         arquivoId = initResponse.arquivoId
 
-        // Atualiza o ID do upload
         setUploads((prev) => {
           const next = new Map(prev)
           const existing = next.get(tempId)
@@ -322,7 +293,6 @@ export function useUpload(): UseUploadReturn {
           return next
         })
 
-        // Se arquivo duplicado, já está completo
         if (initResponse.arquivoDuplicado) {
           updateUpload(arquivoId, { 
             progress: 100, 
@@ -336,7 +306,6 @@ export function useUpload(): UseUploadReturn {
         const totalChunks = initResponse.totalChunks
         const chunkSize = initResponse.chunkSizeBytes || CHUNK_SIZE_BYTES
 
-        // Persiste a sessão no IndexedDB para permitir retomada
         const session: PersistedUploadSession = {
           fingerprint,
           arquivoId,
@@ -352,13 +321,10 @@ export function useUpload(): UseUploadReturn {
         }
         await saveUploadSession(session)
 
-        // Gera lista de todos os chunks para enviar
         const chunksToSend = Array.from({ length: totalChunks }, (_, i) => i)
 
-        // Lê o arquivo em memória
         const fileBuffer = await file.arrayBuffer()
 
-        // Envia chunks em paralelo
         const success = await sendChunksInParallel(
           arquivoId,
           sessaoId,
@@ -382,7 +348,6 @@ export function useUpload(): UseUploadReturn {
             status: "PROCESSANDO",
             chunksSent: totalChunks 
           })
-          // Remove a sessão do IndexedDB pois o upload foi concluído
           await removeUploadSession(fingerprint)
         }
 
@@ -401,16 +366,11 @@ export function useUpload(): UseUploadReturn {
     [updateUpload, sendChunksInParallel, resumeUploadInternal],
   )
 
-  /**
-   * Retoma um upload a partir de uma sessão persistida.
-   * Requer o arquivo original (mesmo conteúdo) e a sessão do IndexedDB.
-   */
   const resumeUpload = useCallback(
     async (file: File, sessaoId: string, persistedSession: PersistedUploadSession) => {
       setIsUploading(true)
 
       try {
-        // Verifica se o fingerprint do arquivo corresponde
         const fingerprint = await calculateFileFingerprint(file)
         
         if (fingerprint !== persistedSession.fingerprint) {

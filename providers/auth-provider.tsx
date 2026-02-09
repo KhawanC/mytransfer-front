@@ -24,13 +24,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isFetchingRef = useRef(false)
 
   const fetchUser = useCallback(async () => {
-    // Prevenir múltiplas chamadas simultâneas
     if (isFetchingRef.current) return
     isFetchingRef.current = true
 
     let token = getAccessToken()
     
-    // Se o token estiver expirado, tenta fazer refresh antes de desistir
     if (token && isTokenExpired(token)) {
       token = await refreshAccessToken()
       if (!token) {
@@ -65,21 +63,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Refresh preventivo - renova o token automaticamente antes de expirar
   useEffect(() => {
     const checkAndRefreshToken = async () => {
       const token = getAccessToken()
       if (token && !isTokenExpired(token) && isTokenExpiringSoon(token, 300)) {
-        // Se o token expira em menos de 5 minutos, faz refresh
         await refreshAccessToken()
       }
     }
 
-    // Aguarda 30 segundos antes de iniciar o monitoramento
-    // para evitar conflitos logo após o login
     const initialDelay = setTimeout(() => {
       checkAndRefreshToken()
-      // Verifica a cada 2 minutos após o delay inicial
       refreshIntervalRef.current = setInterval(checkAndRefreshToken, 120000)
     }, 30000)
 
@@ -117,7 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTokens(accessToken, refreshToken)
     const localUser = getUserFromToken(accessToken)
     if (localUser) {
-      // Só atualiza se o usuário for diferente (evita re-renders desnecessários)
       setUser(prevUser => {
         if (prevUser?.id === localUser.id) return prevUser
         return localUser

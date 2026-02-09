@@ -46,17 +46,14 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       ])
       setSession(sessao)
       
-      // Mescla arquivos do backend com os temporários locais, removendo duplicatas
       setArquivos((prev) => {
         const tempFiles = prev.filter(a => a.id.startsWith('temp_'))
         const backendFileIds = new Set(files.map(f => f.id))
         
-        // Remove temporários se o arquivo real já chegou do backend
         const validTempFiles = tempFiles.filter(tf => 
           !files.some(f => f.nomeOriginal === tf.nomeOriginal)
         )
         
-        // Mescla: mantém temporários que ainda não têm correspondente + adiciona todos do backend
         const merged = [...validTempFiles, ...files]
         
         // Remove duplicatas baseado em ID
@@ -124,6 +121,10 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           break
         case "USUARIO_ENTROU":
           toast.info("Um usuário entrou na sessão")
+          fetchSession()
+          break
+        case "USUARIO_SAIU":
+          toast.info("O usuário convidado saiu da sessão")
           fetchSession()
           break
         case "HASH_ATUALIZADO": {
@@ -280,6 +281,20 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
     }
   }
 
+  async function handleLeaveSession() {
+    if (!session) return
+    try {
+      await api(`/api/transferencia/sessao/sair`, { 
+        method: "POST",
+        body: JSON.stringify({ sessaoId: session.id })
+      })
+      toast.success("Você saiu da sessão")
+      router.replace("/dashboard")
+    } catch {
+      toast.error("Erro ao sair da sessão")
+    }
+  }
+
   async function handleResumeUpload(file: File, persistedSession: PersistedUploadSession) {
     if (!session) return
     
@@ -328,8 +343,10 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   if (!session) return null
 
   const isCreator = session.usuarioCriadorId === user?.id
+  const isGuest = session.usuarioConvidadoId === user?.id
   const isPendingGuest = session.usuarioConvidadoPendenteId === user?.id
   const isWaitingApproval = session.status === "AGUARDANDO_APROVACAO" && isPendingGuest
+  const canLeaveSession = (isGuest && session.status === "ATIVA") || isPendingGuest
 
   const canUpload = session.podeUpload ?? false
 
@@ -360,6 +377,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         session={session}
         isCreator={isCreator}
         onEndSession={handleEndSession}
+        onLeaveSession={canLeaveSession ? handleLeaveSession : undefined}
         isConnected={isConnected}
       />
 
@@ -376,6 +394,12 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
               <p className="text-xs text-muted-foreground">
                 Você poderá transferir arquivos assim que sua entrada for aprovada
               </p>
+              <button
+                onClick={handleLeaveSession}
+                className="mt-2 text-xs text-red-400 hover:text-red-300 underline"
+              >
+                Cancelar e sair da sessão
+              </button>
             </div>
           </div>
         )}

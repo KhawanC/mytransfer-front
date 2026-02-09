@@ -30,7 +30,6 @@ export interface Sessao {
   criadaEm: string
   expiraEm: string
   hashExpiraEm?: string
-  // Flags de permissão calculadas pelo backend
   podeUpload?: boolean
   podeEncerrar?: boolean
   estaAtiva?: boolean

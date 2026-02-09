@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { formatHash } from "@/lib/utils"
-import { ArrowLeftRight, ArrowLeft, Clock, Copy, Power, QrCode, Wifi, WifiOff } from "lucide-react"
+import { ArrowLeftRight, ArrowLeft, Clock, Copy, Power, QrCode, Wifi, WifiOff, LogOut } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -25,10 +25,11 @@ interface SessionHeaderProps {
   session: Sessao
   isCreator: boolean
   onEndSession: () => void
+  onLeaveSession?: () => void
   isConnected: boolean
 }
 
-export function SessionHeader({ session, isCreator, onEndSession, isConnected }: SessionHeaderProps) {
+export function SessionHeader({ session, isCreator, onEndSession, onLeaveSession, isConnected }: SessionHeaderProps) {
   const router = useRouter()
   const { formatted, isExpired } = useCountdown(session.expiraEm)
   const [showQr, setShowQr] = useState(false)
@@ -111,7 +112,30 @@ export function SessionHeader({ session, isCreator, onEndSession, isConnected }:
                     </Button>
                   </DialogFooter>
                 </DialogContent>
+              
+
+            {onLeaveSession && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer text-orange-400">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-xs">
+                  <DialogHeader>
+                    <DialogTitle>Sair da sessão?</DialogTitle>
+                    <DialogDescription>
+                      Você será desconectado da sessão. O criador poderá convidar outro usuário.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button variant="destructive" onClick={onLeaveSession} className="w-full cursor-pointer">
+                      Sair
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
               </Dialog>
+            )}</Dialog>
             )}
           </div>
         </div>

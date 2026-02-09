@@ -36,7 +36,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!isConnected || !user) return
 
-    const unsubNotif = subscribe("/queue/notificacoes", (data) => {
+    const unsubNotif = subscribe("/user/queue/notificacoes", (data) => {
       const notif = data as NotificacaoResponse
       if (notif.tipo === "SOLICITACAO_ENTRADA_CRIADOR") {
         const sessaoId = notif.dados as string

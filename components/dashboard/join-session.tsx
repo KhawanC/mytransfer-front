@@ -60,12 +60,10 @@ export function JoinSession({ onJoined }: JoinSessionProps) {
   }
 
   function handleQrResult(data: string) {
-    // Remove espaços em branco e quebras de linha
     const cleanData = data.trim()
     
     console.log("QR Code escaneado:", cleanData)
     
-    // Tenta extrair o hash da URL completa
     const urlMatch = cleanData.match(/\/transfer\/(\d{8})/)
     if (urlMatch) {
       console.log("Hash extraído da URL:", urlMatch[1])
@@ -73,14 +71,12 @@ export function JoinSession({ onJoined }: JoinSessionProps) {
       return
     }
     
-    // Se for apenas o hash (8 dígitos)
     if (/^\d{8}$/.test(cleanData)) {
       console.log("Hash direto:", cleanData)
       joinSession(cleanData)
       return
     }
     
-    // Fallback: tenta extrair qualquer sequência de 8 dígitos consecutivos
     const numericMatch = cleanData.match(/(\d{8})/)
     if (numericMatch) {
       console.log("Hash extraído por fallback:", numericMatch[1])

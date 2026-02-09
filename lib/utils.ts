@@ -32,7 +32,6 @@ export function formatRelativeTime(dateString: string): string {
   if (hours < 24) return `há ${hours} ${hours === 1 ? "hora" : "horas"}`
   if (days < 7) return `há ${days} ${days === 1 ? "dia" : "dias"}`
   
-  // Para datas mais antigas, mostra a data formatada
   return date.toLocaleDateString("pt-BR", { 
     day: "2-digit", 
     month: "2-digit", 

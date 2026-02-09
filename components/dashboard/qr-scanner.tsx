@@ -25,8 +25,7 @@ export function QrScanner({ onResult }: QrScannerProps) {
       await scanner.start(
         { facingMode: "environment" },
         { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 },
+          fps: 10,
           aspectRatio: 1.0,
           disableFlip: false,
         },
@@ -36,7 +35,6 @@ export function QrScanner({ onResult }: QrScannerProps) {
           stopScanner()
         },
         (errorMessage) => {
-          // Log silencioso de erros de scan (normal durante o scan)
           if (!errorMessage.includes("NotFoundException")) {
             console.debug("Erro de scan:", errorMessage)
           }
@@ -56,7 +54,6 @@ export function QrScanner({ onResult }: QrScannerProps) {
         await scannerRef.current.stop()
       }
     } catch {
-      // ignore
     } finally {
       setIsScanning(false)
     }

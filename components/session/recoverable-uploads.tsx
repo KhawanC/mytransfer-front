@@ -44,7 +44,6 @@ export function RecoverableUploads({
     if (file) {
       onResume(file, session)
     }
-    // Limpa o input para permitir selecionar o mesmo arquivo novamente
     event.target.value = ""
   }
 
