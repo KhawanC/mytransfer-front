@@ -59,19 +59,37 @@ export function JoinSession({ onJoined }: JoinSessionProps) {
     joinSession(hash.trim())
   }
 
-  function handleQrResult(url: string) {
-    const match = url.match(/\/transfer\/(\d{8})$/)
-    if (match) {
-      joinSession(match[1])
-    } else {
-      // Fallback: tenta extrair qualquer sequência de 8 dígitos
-      const numericMatch = url.match(/(\d{8})/)
-      if (numericMatch) {
-        joinSession(numericMatch[1])
-      } else {
-        toast.error("Código QR inválido")
-      }
+  function handleQrResult(data: string) {
+    // Remove espaços em branco e quebras de linha
+    const cleanData = data.trim()
+    
+    console.log("QR Code escaneado:", cleanData)
+    
+    // Tenta extrair o hash da URL completa
+    const urlMatch = cleanData.match(/\/transfer\/(\d{8})/)
+    if (urlMatch) {
+      console.log("Hash extraído da URL:", urlMatch[1])
+      joinSession(urlMatch[1])
+      return
     }
+    
+    // Se for apenas o hash (8 dígitos)
+    if (/^\d{8}$/.test(cleanData)) {
+      console.log("Hash direto:", cleanData)
+      joinSession(cleanData)
+      return
+    }
+    
+    // Fallback: tenta extrair qualquer sequência de 8 dígitos consecutivos
+    const numericMatch = cleanData.match(/(\d{8})/)
+    if (numericMatch) {
+      console.log("Hash extraído por fallback:", numericMatch[1])
+      joinSession(numericMatch[1])
+      return
+    }
+    
+    console.error("QR Code inválido:", cleanData)
+    toast.error("Código QR inválido. Formato esperado: 8 dígitos")
   }
 
   return (

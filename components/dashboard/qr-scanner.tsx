@@ -24,15 +24,27 @@ export function QrScanner({ onResult }: QrScannerProps) {
 
       await scanner.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 200, height: 200 } },
+        { 
+          fps: 10, 
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+        },
         (decodedText) => {
+          console.log("QR Code detectado:", decodedText)
           onResult(decodedText)
           stopScanner()
         },
-        () => {},
+        (errorMessage) => {
+          // Log silencioso de erros de scan (normal durante o scan)
+          if (!errorMessage.includes("NotFoundException")) {
+            console.debug("Erro de scan:", errorMessage)
+          }
+        },
       )
       setIsScanning(true)
-    } catch {
+    } catch (err) {
+      console.error("Erro ao iniciar scanner:", err)
       setError("Não foi possível acessar a câmera. Verifique as permissões.")
       setIsScanning(false)
     }
