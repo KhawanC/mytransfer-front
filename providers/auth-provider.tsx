@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const refreshIntervalRef = useRef<NodeJS.Timeout>()
+  const refreshIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const isFetchingRef = useRef(false)
 
   const fetchUser = useCallback(async () => {
