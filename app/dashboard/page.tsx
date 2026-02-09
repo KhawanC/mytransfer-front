@@ -63,9 +63,7 @@ export default function DashboardPage() {
     })
   }, [])
 
-  const hasActivePending = sessions.some(
-    (s) => s.status === "AGUARDANDO" || s.status === "ATIVA",
-  )
+  const hasActivePending = sessions.some((s) => s.estaAtiva)
 
   return (
     <div className="space-y-6">

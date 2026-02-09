@@ -331,8 +331,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   const isPendingGuest = session.usuarioConvidadoPendenteId === user?.id
   const isWaitingApproval = session.status === "AGUARDANDO_APROVACAO" && isPendingGuest
 
-  const canUpload =
-    session.status === "ATIVA" && !isUploading
+  const canUpload = session.podeUpload ?? false
 
   const mergedArquivos = arquivos.map((arq) => {
     const upload = uploads.get(arq.id)

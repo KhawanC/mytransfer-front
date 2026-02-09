@@ -32,7 +32,7 @@ export function SessionHeader({ session, isCreator, onEndSession, isConnected }:
   const router = useRouter()
   const { formatted, isExpired } = useCountdown(session.expiraEm)
   const [showQr, setShowQr] = useState(false)
-  const isActive = session.status === "ATIVA" || session.status === "AGUARDANDO" || session.status === "AGUARDANDO_APROVACAO"
+  const isActive = session.estaAtiva ?? false
 
   const shareUrl =
     typeof window !== "undefined"

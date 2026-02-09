@@ -43,9 +43,9 @@ export function SessionCard({ session, currentUserId, onDeleted }: SessionCardPr
   const [isDeleting, setIsDeleting] = useState(false)
 
   const config = statusConfig[session.status] || { label: "Desconhecido", variant: "secondary" as const }
-  const isActive = session.status === "ATIVA" || session.status === "AGUARDANDO" || session.status === "AGUARDANDO_APROVACAO"
+  const isActive = session.estaAtiva ?? false
   const isCreator = session.usuarioCriadorId === currentUserId
-  const canDelete = isCreator && (session.status === "AGUARDANDO" || session.status === "AGUARDANDO_APROVACAO" || session.status === "ATIVA")
+  const canDelete = session.podeEncerrar ?? false
 
   async function handleDelete() {
     setIsDeleting(true)

@@ -43,10 +43,7 @@ export function FileList({ arquivos, currentUserId, currentUserName, onDownload,
           onDownload={onDownload}
           onDelete={onDelete}
           onCancel={onCancel}
-          canDelete={
-            arq.remetenteId === currentUserId &&
-            (sessionStatus === "ATIVA" || sessionStatus === "AGUARDANDO")
-          }
+          canDelete={arq.remetenteId === currentUserId}
         />
       ))}
     </div>
