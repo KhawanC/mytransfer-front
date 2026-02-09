@@ -1,9 +1,9 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react"
 import type { User, AuthResponse } from "@/types"
-import { api, ApiError } from "@/lib/api"
-import { getAccessToken, setTokens, clearTokens, isTokenExpired, getUserFromToken } from "@/lib/auth"
+import { api, ApiError, refreshAccessToken } from "@/lib/api"
+import { getAccessToken, setTokens, clearTokens, isTokenExpired, isTokenExpiringSoon, getUserFromToken } from "@/lib/auth"
 
 interface AuthContextValue {
   user: User | null
@@ -20,10 +20,22 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const refreshIntervalRef = useRef<NodeJS.Timeout>()
 
   const fetchUser = useCallback(async () => {
-    const token = getAccessToken()
-    if (!token || isTokenExpired(token)) {
+    let token = getAccessToken()
+    
+    // Se o token estiver expirado, tenta fazer refresh antes de desistir
+    if (token && isTokenExpired(token)) {
+      token = await refreshAccessToken()
+      if (!token) {
+        setUser(null)
+        setIsLoading(false)
+        return
+      }
+    }
+
+    if (!token) {
       setUser(null)
       setIsLoading(false)
       return
@@ -42,6 +54,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } finally {
       setIsLoading(false)
+    }
+  }, [])
+
+  // Refresh preventivo - renova o token automaticamente antes de expirar
+  useEffect(() => {
+    const checkAndRefreshToken = async () => {
+      const token = getAccessToken()
+      if (token && !isTokenExpired(token) && isTokenExpiringSoon(token, 300)) {
+        // Se o token expira em menos de 5 minutos, faz refresh
+        await refreshAccessToken()
+      }
+    }
+
+    // Verifica a cada 2 minutos
+    refreshIntervalRef.current = setInterval(checkAndRefreshToken, 120000)
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current)
+      }
     }
   }, [])
 
@@ -76,6 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     clearTokens()
     setUser(null)
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current)
+    }
   }
 
   return (

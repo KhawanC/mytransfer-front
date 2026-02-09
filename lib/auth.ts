@@ -40,6 +40,14 @@ export function isTokenExpired(token: string): boolean {
   return Date.now() >= payload.exp * 1000
 }
 
+export function isTokenExpiringSoon(token: string, thresholdSeconds: number = 300): boolean {
+  const payload = decodeJwtPayload(token)
+  if (!payload || typeof payload.exp !== "number") return true
+  const expirationTime = payload.exp * 1000
+  const timeUntilExpiry = expirationTime - Date.now()
+  return timeUntilExpiry < thresholdSeconds * 1000
+}
+
 export function getUserFromToken(token: string): User | null {
   const payload = decodeJwtPayload(token)
   if (!payload) return null
