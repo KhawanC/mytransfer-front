@@ -21,8 +21,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const refreshIntervalRef = useRef<NodeJS.Timeout>()
+  const isFetchingRef = useRef(false)
 
   const fetchUser = useCallback(async () => {
+    // Prevenir múltiplas chamadas simultâneas
+    if (isFetchingRef.current) return
+    isFetchingRef.current = true
+
     let token = getAccessToken()
     
     // Se o token estiver expirado, tenta fazer refresh antes de desistir
@@ -31,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!token) {
         setUser(null)
         setIsLoading(false)
+        isFetchingRef.current = false
         return
       }
     }
@@ -38,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!token) {
       setUser(null)
       setIsLoading(false)
+      isFetchingRef.current = false
       return
     }
 
@@ -54,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } finally {
       setIsLoading(false)
+      isFetchingRef.current = false
     }
   }, [])
 
@@ -67,10 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Verifica a cada 2 minutos
-    refreshIntervalRef.current = setInterval(checkAndRefreshToken, 120000)
+    // Aguarda 30 segundos antes de iniciar o monitoramento
+    // para evitar conflitos logo após o login
+    const initialDelay = setTimeout(() => {
+      checkAndRefreshToken()
+      // Verifica a cada 2 minutos após o delay inicial
+      refreshIntervalRef.current = setInterval(checkAndRefreshToken, 120000)
+    }, 30000)
 
     return () => {
+      clearTimeout(initialDelay)
       if (refreshIntervalRef.current) {
         clearInterval(refreshIntervalRef.current)
       }
@@ -81,37 +95,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser()
   }, [fetchUser])
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     const data = await api<AuthResponse>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     })
     setTokens(data.accessToken, data.refreshToken)
     setUser(data.user)
-  }
+  }, [])
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = useCallback(async (name: string, email: string, password: string) => {
     const data = await api<AuthResponse>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ name, email, password }),
     })
     setTokens(data.accessToken, data.refreshToken)
     setUser(data.user)
-  }
+  }, [])
 
-  const loginWithTokens = (accessToken: string, refreshToken: string) => {
+  const loginWithTokens = useCallback((accessToken: string, refreshToken: string) => {
     setTokens(accessToken, refreshToken)
     const localUser = getUserFromToken(accessToken)
-    setUser(localUser)
-  }
+    if (localUser) {
+      // Só atualiza se o usuário for diferente (evita re-renders desnecessários)
+      setUser(prevUser => {
+        if (prevUser?.id === localUser.id) return prevUser
+        return localUser
+      })
+      setIsLoading(false)
+    }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearTokens()
     setUser(null)
     if (refreshIntervalRef.current) {
       clearInterval(refreshIntervalRef.current)
     }
-  }
+  }, [])
 
   return (
     <AuthContext.Provider

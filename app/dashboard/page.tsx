@@ -29,21 +29,21 @@ export default function DashboardPage() {
     fetchSessions()
   }, [fetchSessions])
 
-  const hasActivePending = sessions.some(
-    (s) => s.status === "AGUARDANDO" || s.status === "ATIVA",
-  )
-
-  async function handleSessionCreated(sessao: Sessao) {
+  const handleSessionCreated = useCallback(async (sessao: Sessao) => {
     setSessions((prev) => [sessao, ...prev])
-  }
+  }, [])
 
-  function handleJoined(sessao: Sessao) {
+  const handleJoined = useCallback((sessao: Sessao) => {
     setSessions((prev) => {
       const exists = prev.find((s) => s.id === sessao.id)
       if (exists) return prev.map((s) => (s.id === sessao.id ? sessao : s))
       return [sessao, ...prev]
     })
-  }
+  }, [])
+
+  const hasActivePending = sessions.some(
+    (s) => s.status === "AGUARDANDO" || s.status === "ATIVA",
+  )
 
   return (
     <div className="space-y-6">

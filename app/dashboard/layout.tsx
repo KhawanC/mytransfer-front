@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, type ReactNode } from "react"
+import { useEffect, useCallback, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/providers/auth-provider"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -25,6 +25,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, isLoading, router])
 
+  const handleLogout = useCallback(() => {
+    logout()
+    router.replace("/login")
+  }, [logout, router])
+
   if (isLoading || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-dvh">
@@ -39,11 +44,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     .slice(0, 2)
     .join("")
     .toUpperCase() ?? "U"
-
-  function handleLogout() {
-    logout()
-    router.replace("/login")
-  }
 
   return (
     <div className="min-h-dvh flex flex-col">
