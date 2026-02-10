@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LoginForm } from "@/components/auth/login-form"
 import { RegisterForm } from "@/components/auth/register-form"
+import { GuestLoginButton } from "@/components/auth/guest-login-button"
 import { ArrowLeftRight } from "lucide-react"
 
 export default function LoginPage() {
@@ -58,6 +59,23 @@ export default function LoginPage() {
             </CardContent>
           </Tabs>
         </Card>
+
+        <div className="space-y-2">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Ou</span>
+            </div>
+          </div>
+          
+          <GuestLoginButton />
+          
+          <p className="text-xs text-center text-muted-foreground px-2">
+            Sessões de convidado duram 10 minutos e aceitam até 10 arquivos de 150MB
+          </p>
+        </div>
       </div>
     </div>
   )

@@ -1,8 +1,12 @@
+export type UserType = 'GUEST' | 'FREE' | 'PREMIUM'
+
 export interface User {
   id: string
   email: string
   name: string
   authProvider: string
+  userType: UserType
+  guestCreatedAt?: string
 }
 
 export interface AuthResponse {
@@ -16,6 +20,14 @@ export interface AuthResponse {
 export type StatusSessao = "AGUARDANDO" | "AGUARDANDO_APROVACAO" | "ATIVA" | "EXPIRADA" | "ENCERRADA"
 
 export type StatusArquivo = "PENDENTE" | "ENVIANDO" | "PROCESSANDO" | "COMPLETO" | "ERRO"
+
+export interface SessaoLimites {
+  maxArquivos: number | null
+  maxTamanhoMb: number
+  duracaoMinutos: number
+  userType: UserType
+  arquivosIlimitados: boolean
+}
 
 export interface Sessao {
   id: string

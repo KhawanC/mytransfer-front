@@ -71,6 +71,7 @@ export default function DashboardPage() {
         <CreateSession
           onCreated={handleSessionCreated}
           disabled={hasActivePending}
+          userType={user?.userType}
         />
         <JoinSession onJoined={handleJoined} />
       </div>

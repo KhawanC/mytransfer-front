@@ -10,6 +10,7 @@ import { useUploadRecovery } from "@/hooks/use-upload-recovery"
 import type { Sessao, Arquivo, NotificacaoResponse, ProgressoUploadResponse } from "@/types"
 import type { PersistedUploadSession } from "@/lib/upload-storage"
 import { SessionHeader } from "@/components/session/session-header"
+import { SessionLimitsInfo } from "@/components/session/session-limits-info"
 import { UploadZone } from "@/components/session/upload-zone"
 import { FileList } from "@/components/session/file-list"
 import { PendingApprovalAlert } from "@/components/session/pending-approval-alert"
@@ -379,6 +380,11 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         onEndSession={handleEndSession}
         onLeaveSession={canLeaveSession ? handleLeaveSession : undefined}
         isConnected={isConnected}
+      />
+
+      <SessionLimitsInfo 
+        sessaoId={session.id} 
+        totalArquivos={session.totalArquivosTransferidos}
       />
 
       <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-4 space-y-4">

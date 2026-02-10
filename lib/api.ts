@@ -117,4 +117,11 @@ export async function getPendingUploads(sessaoId: string): Promise<import("@/typ
   return api(`/api/transferencia/sessao/${sessaoId}/uploads-pendentes`)
 }
 
+/**
+ * Obtém os limites da sessão baseado no tipo do usuário criador.
+ */
+export async function fetchSessionLimits(sessaoId: string): Promise<import("@/types").SessaoLimites> {
+  return api(`/api/transferencia/sessao/${sessaoId}/limites`)
+}
+
 export { ApiError }

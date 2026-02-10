@@ -57,5 +57,27 @@ export function getUserFromToken(token: string): User | null {
     email: payload.sub as string,
     name: payload.name as string,
     authProvider: "LOCAL",
+    userType: "FREE",
+  }
+}
+
+export async function loginAsGuest(): Promise<User | null> {
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+    const res = await fetch(`${API_URL}/api/auth/guest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    })
+
+    if (!res.ok) {
+      throw new Error("Failed to create guest user")
+    }
+
+    const data = await res.json()
+    setTokens(data.accessToken, data.refreshToken)
+    return data.user
+  } catch (error) {
+    console.error("Guest login failed:", error)
+    return null
   }
 }

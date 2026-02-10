@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
-import type { Sessao } from "@/types"
+import type { Sessao, UserType } from "@/types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, Loader2, Copy, QrCode } from "lucide-react"
+import { Plus, Loader2, Copy, QrCode, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { formatHash } from "@/lib/utils"
 import { QRCodeSVG } from "qrcode.react"
@@ -22,13 +22,16 @@ import { QRCodeSVG } from "qrcode.react"
 interface CreateSessionProps {
   onCreated: (sessao: Sessao) => void
   disabled: boolean
+  userType?: UserType
 }
 
-export function CreateSession({ onCreated, disabled }: CreateSessionProps) {
+export function CreateSession({ onCreated, disabled, userType }: CreateSessionProps) {
   const [open, setOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [createdSession, setCreatedSession] = useState<Sessao | null>(null)
   const router = useRouter()
+
+  const isGuest = userType === 'GUEST'
 
   async function handleCreate() {
     setIsCreating(true)
@@ -89,6 +92,25 @@ export function CreateSession({ onCreated, disabled }: CreateSessionProps) {
               <DialogDescription>
                 Crie uma sessão para compartilhar arquivos com alguém. Compartilhe o código ou QR
                 Code gerado.
+            
+            {isGuest && (
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs space-y-1">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-medium text-amber-400">Limites de Convidado</p>
+                    <ul className="text-muted-foreground space-y-0.5 ml-2">
+                      <li>• Duração: 10 minutos</li>
+                      <li>• Máximo: 10 arquivos de 150MB cada</li>
+                    </ul>
+                    <p className="text-muted-foreground">
+                      Faça login para limites maiores (30min, 25 arquivos de 250MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
