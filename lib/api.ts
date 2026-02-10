@@ -128,7 +128,7 @@ export async function fetchSessionLimits(sessaoId: string): Promise<import("@/ty
  * Obtém as estatísticas da sessão (quantidade de arquivos, espaço disponível, etc).
  */
 export async function getSessaoEstatisticas(sessaoId: string): Promise<import("@/types").SessaoEstatisticas> {
-  return api(`/api/transferencia/sessao/${sessaoId}/limites`)
+  return api(`/api/transferencia/sessao/${sessaoId}/estatisticas`)
 }
 
 /**
