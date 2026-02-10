@@ -11,9 +11,10 @@ interface FileListProps {
   onDelete: (arquivoId: string) => void
   onCancel?: (arquivoId: string) => void
   sessionStatus: StatusSessao
+  espacoDisponivel: number
 }
 
-export function FileList({ arquivos, currentUserId, currentUserName, onDownload, onDelete, onCancel, sessionStatus }: FileListProps) {
+export function FileList({ arquivos, currentUserId, currentUserName, onDownload, onDelete, onCancel, sessionStatus, espacoDisponivel }: FileListProps) {
   if (arquivos.length === 0) {
     return (
       <div className="py-8 text-center">
@@ -44,6 +45,7 @@ export function FileList({ arquivos, currentUserId, currentUserName, onDownload,
           onDelete={onDelete}
           onCancel={onCancel}
           canDelete={arq.remetenteId === currentUserId}
+          espacoDisponivel={espacoDisponivel}
         />
       ))}
     </div>

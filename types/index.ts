@@ -1,5 +1,7 @@
 export type UserType = 'GUEST' | 'FREE' | 'PREMIUM'
 
+export type FormatoImagem = 'JPEG' | 'JPG' | 'PNG' | 'BMP' | 'WEBP' | 'SVG' | 'TIFF' | 'ICO'
+
 export interface User {
   id: string
   email: string
@@ -27,6 +29,14 @@ export interface SessaoLimites {
   duracaoMinutos: number
   userType: UserType
   arquivosIlimitados: boolean
+}
+
+export interface SessaoEstatisticas {
+  quantidadeArquivos: number
+  limiteArquivos: number | null
+  tamanhoTotalBytes: number
+  limiteTamanhoBytes: number
+  espacoDisponivel: number
 }
 
 export interface Sessao {
@@ -61,6 +71,9 @@ export interface Arquivo {
   chunksRecebidos: number
   criadoEm: string
   atualizadoEm: string
+  conversivel?: boolean
+  arquivoOriginalId?: string
+  formatoConvertido?: string
 }
 
 export interface IniciarUploadResponse {
@@ -106,6 +119,7 @@ export type TipoNotificacao =
   | "UPLOAD_COMPLETO"
   | "UPLOAD_ERRO"
   | "ARQUIVO_DISPONIVEL"
+  | "ARQUIVO_CONVERTIDO"
   | "SOLICITACAO_ENTRADA"
   | "SOLICITACAO_ENTRADA_CRIADOR"
   | "ENTRADA_APROVADA"

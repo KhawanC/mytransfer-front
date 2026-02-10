@@ -124,4 +124,28 @@ export async function fetchSessionLimits(sessaoId: string): Promise<import("@/ty
   return api(`/api/transferencia/sessao/${sessaoId}/limites`)
 }
 
+/**
+ * Obtém as estatísticas da sessão (quantidade de arquivos, espaço disponível, etc).
+ */
+export async function getSessaoEstatisticas(sessaoId: string): Promise<import("@/types").SessaoEstatisticas> {
+  return api(`/api/transferencia/sessao/${sessaoId}/limites`)
+}
+
+/**
+ * Obtém os formatos disponíveis para conversão de um arquivo.
+ */
+export async function getFormatosDisponiveis(arquivoId: string): Promise<import("@/types").FormatoImagem[]> {
+  return api(`/api/transferencia/arquivo/${arquivoId}/formatos-disponiveis`)
+}
+
+/**
+ * Solicita a conversão de um arquivo para um novo formato.
+ */
+export async function converterArquivo(arquivoId: string, formato: import("@/types").FormatoImagem): Promise<{ message: string }> {
+  return api(`/api/transferencia/arquivo/${arquivoId}/converter`, {
+    method: "POST",
+    body: JSON.stringify({ formato }),
+  })
+}
+
 export { ApiError }

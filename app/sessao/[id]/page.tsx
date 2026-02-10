@@ -7,6 +7,7 @@ import { api } from "@/lib/api"
 import { useWebSocket } from "@/hooks/use-websocket"
 import { useUpload } from "@/hooks/use-upload"
 import { useUploadRecovery } from "@/hooks/use-upload-recovery"
+import { useSessionLimits } from "@/hooks/use-session-limits"
 import type { Sessao, Arquivo, NotificacaoResponse, ProgressoUploadResponse } from "@/types"
 import type { PersistedUploadSession } from "@/lib/upload-storage"
 import { SessionHeader } from "@/components/session/session-header"
@@ -38,6 +39,8 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
     discardAll: discardAllRecoverable,
     refreshRecoverable 
   } = useUploadRecovery(id)
+  
+  const { espacoDisponivel, revalidate: revalidateLimites } = useSessionLimits(id)
 
   const fetchSession = useCallback(async () => {
     try {
@@ -162,6 +165,18 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           )
           clearUpload(dados.arquivoId)
           toast.success(`${dados.nomeArquivo} disponível para download`)
+          revalidateLimites()
+          break
+        case "ARQUIVO_CONVERTIDO":
+          const dadosConv = notif.dados as { 
+            arquivoOriginalId: string
+            arquivoConvertidoId: string
+            nomeArquivo: string 
+            formato: string
+          }
+          toast.success(`Conversão concluída: ${dadosConv.nomeArquivo}`)
+          fetchSession()
+          revalidateLimites()
           break
       }
     })
@@ -425,6 +440,9 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
 
         <FileList
           arquivos={mergedArquivos}
+          espacoDisponivel={espacoDisponivel}
+          onCancelUpload={handleCancelUpload}
+        />
           currentUserId={user?.id ?? ""}
           currentUserName={user?.name}
           onDownload={handleDownload}
