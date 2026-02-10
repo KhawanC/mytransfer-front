@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { Arquivo, FormatoConversao } from "@/types"
+import type { Arquivo, FormatoConversao, NivelOtimizacao } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -30,10 +30,12 @@ import {
   Repeat,
   ChevronLeft,
   FileType,
+  Sparkles,
 } from "lucide-react"
 import { formatBytes, formatRelativeTime, cn, getFileExtensionLabel } from "@/lib/utils"
 import { ConversionModal } from "./conversion-modal"
-import { ApiError, getFormatosDisponiveis, converterArquivo } from "@/lib/api"
+import { ApiError, getFormatosDisponiveis, converterArquivo, getNiveisOtimizacao, otimizarArquivo } from "@/lib/api"
+import { OptimizationModal } from "./optimization-modal"
 import { toast } from "sonner"
 
 interface FileCardProps {
@@ -65,12 +67,19 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
   const [selectedFormato, setSelectedFormato] = useState<FormatoConversao | null>(null)
   const [showConversionModal, setShowConversionModal] = useState(false)
   const [hasConversionOptions, setHasConversionOptions] = useState(true)
+  const [showOptimizationPanel, setShowOptimizationPanel] = useState(false)
+  const [niveisDisponiveis, setNiveisDisponiveis] = useState<NivelOtimizacao[]>([])
+  const [loadingNiveis, setLoadingNiveis] = useState(false)
+  const [selectedNivel, setSelectedNivel] = useState<NivelOtimizacao | null>(null)
+  const [showOptimizationModal, setShowOptimizationModal] = useState(false)
+  const [hasOptimizationOptions, setHasOptimizationOptions] = useState(true)
   
   const iconElement = getFileIconElement(arquivo.tipoMime)
   const senderName = arquivo.nomeRemetente || (isOwner ? "Você" : "Outro usuário")
   const timeAgo = formatRelativeTime(arquivo.criadoEm)
 
-  const isConverted = Boolean(arquivo.arquivoOriginalId)
+  const isOptimized = arquivo.tag === "OTIMIZADO"
+  const isConverted = Boolean(arquivo.arquivoOriginalId) && !isOptimized
   const extensionLabel = getFileExtensionLabel({
     nomeOriginal: arquivo.nomeOriginal,
     tipoMime: arquivo.tipoMime,
@@ -79,6 +88,14 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
   })
 
   const podeConverter = arquivo.conversivel && arquivo.status === "COMPLETO" && espacoDisponivel > 0 && hasConversionOptions
+  const podeOtimizar = arquivo.conversivel && arquivo.status === "COMPLETO" && espacoDisponivel > 0 && hasOptimizationOptions && !isOptimized
+
+  const reduction = isOptimized && arquivo.tamanhoOriginalBytes && arquivo.tamanhoOriginalBytes > arquivo.tamanhoBytes
+    ? {
+        diffBytes: arquivo.tamanhoOriginalBytes - arquivo.tamanhoBytes,
+        percent: Math.round(((arquivo.tamanhoOriginalBytes - arquivo.tamanhoBytes) / arquivo.tamanhoOriginalBytes) * 100),
+      }
+    : null
 
   const handleToggleConversionPanel = () => {
     const next = !showConversionPanel
@@ -120,6 +137,46 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
     setShowConversionModal(true)
   }
 
+  const handleToggleOptimizationPanel = () => {
+    const next = !showOptimizationPanel
+
+    if (!next) {
+      setShowOptimizationPanel(false)
+      return
+    }
+
+    setShowOptimizationPanel(true)
+
+    if (loadingNiveis) return
+
+    setLoadingNiveis(true)
+    getNiveisOtimizacao(arquivo.id)
+      .then((niveis) => {
+        setNiveisDisponiveis(niveis)
+        const temNiveis = niveis.length > 0
+        setHasOptimizationOptions(temNiveis)
+        if (!temNiveis) {
+          setShowOptimizationPanel(false)
+        }
+      })
+      .catch((err) => {
+        if (err instanceof ApiError) {
+          if (err.status === 404) toast.error("Arquivo não encontrado")
+          else if (err.status === 410) toast.warning("Sessão expirada")
+          else toast.error(err.message)
+        } else {
+          toast.error("Erro ao carregar níveis de otimização")
+        }
+        console.error(err)
+      })
+      .finally(() => setLoadingNiveis(false))
+  }
+
+  const handleNivelClick = (nivel: NivelOtimizacao) => {
+    setSelectedNivel(nivel)
+    setShowOptimizationModal(true)
+  }
+
   const handleConfirmConversion = async () => {
     if (!selectedFormato) return
 
@@ -138,6 +195,32 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
       }
       console.error(err)
     }
+  }
+
+  const handleConfirmOptimization = async () => {
+    if (!selectedNivel) return
+
+    try {
+      await otimizarArquivo(arquivo.id, selectedNivel)
+      toast.success(`Otimização ${selectedNivel}% iniciada`)
+      setShowOptimizationPanel(false)
+      setSelectedNivel(null)
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 404) toast.error("Arquivo não encontrado")
+        else if (err.status === 410) toast.warning("Sessão expirada")
+        else toast.error(err.message)
+      } else {
+        toast.error("Erro ao solicitar otimização")
+      }
+      console.error(err)
+    }
+  }
+
+  const formatNivelLabel = (nivel: NivelOtimizacao) => {
+    if (nivel === 25) return "Leve 25%"
+    if (nivel === 50) return "Média 50%"
+    return "Pesada 75%"
   }
 
   const statusElement = (() => {
@@ -208,6 +291,7 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
 
   const hasActions =
     podeConverter ||
+    podeOtimizar ||
     arquivo.status === "COMPLETO" ||
     (onCancel && isOwner && (arquivo.status === "ENVIANDO" || arquivo.status === "PENDENTE")) ||
     canDelete
@@ -235,6 +319,11 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                       CONVERTIDO
                     </Badge>
                   )}
+                  {isOptimized && (
+                    <Badge variant="outline" className="text-xs">
+                      OTIMIZADO
+                    </Badge>
+                  )}
                 </div>
               </div>
 
@@ -242,6 +331,11 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                 <span className="truncate">{formatBytes(arquivo.tamanhoBytes)}</span>
                 <span className="truncate text-right">{timeAgo}</span>
                 <span className="truncate col-span-2">{senderName}</span>
+                {reduction && (
+                  <span className="truncate col-span-2 text-emerald-400">
+                    -{reduction.percent}% ({formatBytes(reduction.diffBytes)})
+                  </span>
+                )}
               </div>
 
               <div className="mt-2">{statusElement}</div>
@@ -259,6 +353,18 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                   onClick={handleToggleConversionPanel}
                 >
                   <Repeat className="h-5 w-5 md:h-4 md:w-4" />
+                </Button>
+              )}
+
+              {podeOtimizar && (
+                <Button
+                  variant="ghost"
+                  aria-label="Otimizar arquivo"
+                  className="h-10 px-2 md:h-8 cursor-pointer text-primary hover:text-primary touch-manipulation"
+                  onClick={handleToggleOptimizationPanel}
+                >
+                  <Sparkles className="h-5 w-5 md:h-4 md:w-4 mr-1" />
+                  <span className="text-xs font-medium">Otimizar</span>
                 </Button>
               )}
 
@@ -347,7 +453,6 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
           )}
         </div>
 
-        {/* Conversion panel */}
         <div
           className={cn(
             "overflow-hidden transition-all duration-300 ease-in-out border-t",
@@ -393,6 +498,52 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
             )}
           </div>
         </div>
+
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-300 ease-in-out border-t",
+            showOptimizationPanel ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          )}
+        >
+          <div className="p-4 bg-secondary/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Otimizar em:</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowOptimizationPanel(false)}
+                className="h-8 cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Voltar
+              </Button>
+            </div>
+
+            {loadingNiveis ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : niveisDisponiveis.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Nenhum nível disponível
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {niveisDisponiveis.map((nivel) => (
+                  <Badge
+                    key={nivel}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors justify-center py-2 text-sm"
+                    onClick={() => handleNivelClick(nivel)}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {formatNivelLabel(nivel)}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
 
       <ConversionModal
@@ -403,6 +554,17 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
         }}
         onConfirm={handleConfirmConversion}
         formato={selectedFormato}
+        nomeArquivo={arquivo.nomeOriginal}
+      />
+
+      <OptimizationModal
+        isOpen={showOptimizationModal}
+        onClose={() => {
+          setShowOptimizationModal(false)
+          setSelectedNivel(null)
+        }}
+        onConfirm={handleConfirmOptimization}
+        nivel={selectedNivel}
         nomeArquivo={arquivo.nomeOriginal}
       />
     </Card>

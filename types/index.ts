@@ -6,6 +6,8 @@ export type FormatoVideo = 'MP4' | 'MKV' | 'WEBM' | 'MOV' | 'AVI' | 'FLV' | '3GP
 
 export type FormatoConversao = FormatoImagem | FormatoVideo
 
+export type NivelOtimizacao = 25 | 50 | 75
+
 export interface User {
   id: string
   email: string
@@ -79,6 +81,9 @@ export interface Arquivo {
   conversivel?: boolean
   arquivoOriginalId?: string
   formatoConvertido?: string
+  tag?: string
+  otimizacaoNivel?: NivelOtimizacao
+  tamanhoOriginalBytes?: number
 }
 
 export interface IniciarUploadResponse {
@@ -126,6 +131,7 @@ export type TipoNotificacao =
   | "ARQUIVO_DISPONIVEL"
   | "ARQUIVO_BLOQUEADO"
   | "ARQUIVO_CONVERTIDO"
+  | "ARQUIVO_OTIMIZADO"
   | "SOLICITACAO_ENTRADA"
   | "SOLICITACAO_ENTRADA_CRIADOR"
   | "ENTRADA_APROVADA"

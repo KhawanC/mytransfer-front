@@ -214,6 +214,17 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           fetchSession()
           revalidateLimites()
           break
+        case "ARQUIVO_OTIMIZADO":
+          const dadosOpt = notif.dados as {
+            arquivoOriginalId: string
+            arquivoId: string
+            nomeArquivo: string
+            nivel: number
+          }
+          toast.success(`Otimização concluída: ${dadosOpt.nomeArquivo}`)
+          fetchSession()
+          revalidateLimites()
+          break
       }
     })
 

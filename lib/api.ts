@@ -206,6 +206,17 @@ export async function converterArquivo(arquivoId: string, formato: import("@/typ
   })
 }
 
+export async function getNiveisOtimizacao(arquivoId: string): Promise<import("@/types").NivelOtimizacao[]> {
+  return api(`/api/transferencia/arquivo/${arquivoId}/otimizacoes-disponiveis`)
+}
+
+export async function otimizarArquivo(arquivoId: string, nivel: import("@/types").NivelOtimizacao): Promise<{ message: string }> {
+  return api(`/api/transferencia/arquivo/${arquivoId}/otimizar`, {
+    method: "POST",
+    body: JSON.stringify({ nivel }),
+  })
+}
+
 /**
  * Exclui um arquivo com erro ou pendente.
  */
