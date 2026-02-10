@@ -71,10 +71,6 @@ export default function LoginPage() {
           </div>
           
           <GuestLoginButton />
-          
-          <p className="text-xs text-center text-muted-foreground px-2">
-            Sessões de convidado duram 10 minutos e aceitam até 10 arquivos de 150MB
-          </p>
         </div>
       </div>
     </div>
