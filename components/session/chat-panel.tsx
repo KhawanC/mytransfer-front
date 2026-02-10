@@ -2,9 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { getChatHistory, markChatAsRead } from "@/lib/api"
 import type { ChatDigitandoEvent, ChatMensagem } from "@/types"
-import { ArrowLeft, MessageCircle, Minus, Send } from "lucide-react"
+import { ArrowLeft, ExternalLink, MessageCircle, Minus, Send } from "lucide-react"
 
 interface ChatPanelProps {
   sessaoId: string
@@ -33,6 +43,7 @@ export function ChatPanel({
   const [mensagem, setMensagem] = useState("")
   const [unreadCount, setUnreadCount] = useState(0)
   const [typingUser, setTypingUser] = useState<string | null>(null)
+  const [linkToOpen, setLinkToOpen] = useState<string | null>(null)
   const isOpenRef = useRef(isOpen)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const typingIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -170,19 +181,21 @@ export function ChatPanel({
     return parts.map((part, index) => {
       if (/^https?:\/\//.test(part)) {
         return (
-          <a
+          <button
             key={`link-${index}`}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`break-all underline underline-offset-4 transition-opacity hover:opacity-80 ${
+            onClick={(e) => {
+              e.preventDefault()
+              setLinkToOpen(part)
+            }}
+            className={`break-all underline underline-offset-4 transition-opacity hover:opacity-80 inline-flex items-center gap-1 ${
               isSelf
                 ? "text-primary-foreground decoration-primary-foreground/80"
                 : "text-primary decoration-primary/60 hover:decoration-primary"
             }`}
           >
             {part}
-          </a>
+            <ExternalLink className="h-3 w-3 inline-block shrink-0" />
+          </button>
         )
       }
 
@@ -317,6 +330,34 @@ export function ChatPanel({
           {chatBody}
         </aside>
       )}
+
+      <AlertDialog open={!!linkToOpen} onOpenChange={() => setLinkToOpen(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Abrir link externo?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>Você está prestes a abrir o seguinte link em uma nova aba:</p>
+              <p className="break-all rounded-md bg-muted p-2 text-xs font-mono">{linkToOpen}</p>
+              <p className="text-xs text-muted-foreground">
+                Verifique se o link é confiável antes de continuar.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (linkToOpen) {
+                  window.open(linkToOpen, "_blank", "noopener,noreferrer")
+                  setLinkToOpen(null)
+                }
+              }}
+            >
+              Abrir link
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
