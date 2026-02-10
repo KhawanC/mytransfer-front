@@ -26,8 +26,22 @@ export function FileList({ arquivos, currentUserId, currentUserName, onDownload,
   }
 
   const sorted = [...arquivos].sort((a, b) => {
-    const order = { ENVIANDO: 0, PROCESSANDO: 1, PENDENTE: 2, COMPLETO: 3, ERRO: 4 }
-    return (order[a.status] ?? 5) - (order[b.status] ?? 5)
+    const statusPriority = {
+      PENDENTE: 0,
+      ENVIANDO: 0,
+      PROCESSANDO: 0,
+      COMPLETO: 1,
+      ERRO: 2
+    }
+
+    const aPriority = statusPriority[a.status] ?? 3
+    const bPriority = statusPriority[b.status] ?? 3
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority
+    }
+
+    return new Date(a.criadoEm).getTime() - new Date(b.criadoEm).getTime()
   })
 
   return (
