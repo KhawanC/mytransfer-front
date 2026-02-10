@@ -143,6 +143,29 @@ export interface DownloadResponse {
   urlDownload: string
 }
 
+export interface ChatMensagem {
+  id: string
+  sessaoId: string
+  remetenteId: string
+  remetenteNome: string
+  conteudo: string
+  criadoEm: string
+}
+
+export interface ChatHistorico {
+  mensagens: ChatMensagem[]
+  ultimoLeituraEm?: string
+  naoLidas: number
+}
+
+export interface ChatDigitandoEvent {
+  sessaoId: string
+  usuarioId: string
+  usuarioNome: string
+  digitando: boolean
+  timestamp: string
+}
+
 // Tipos para upload resumable
 
 export interface ProgressoDetalhadoResponse {

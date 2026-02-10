@@ -16,6 +16,7 @@ import { UploadZone } from "@/components/session/upload-zone"
 import { FileList } from "@/components/session/file-list"
 import { PendingApprovalAlert } from "@/components/session/pending-approval-alert"
 import { RecoverableUploads } from "@/components/session/recoverable-uploads"
+import { ChatPanel } from "@/components/session/chat-panel"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 
@@ -29,6 +30,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   const [isLoading, setIsLoading] = useState(true)
   const [showApprovalAlert, setShowApprovalAlert] = useState(false)
   const [pendingUserName, setPendingUserName] = useState<string>("")
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const { isConnected, subscribe, send } = useWebSocket()
   const { uploads, uploadFile, resumeUpload, isUploading, clearUpload, cancelUpload } = useUpload()
@@ -90,6 +92,25 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   useEffect(() => {
     fetchSession()
   }, [fetchSession])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const media = window.matchMedia("(min-width: 1024px)")
+    const update = () => setIsChatOpen(media.matches)
+    update()
+    if (media.addEventListener) {
+      media.addEventListener("change", update)
+    } else {
+      media.addListener(update)
+    }
+    return () => {
+      if (media.removeEventListener) {
+        media.removeEventListener("change", update)
+      } else {
+        media.removeListener(update)
+      }
+    }
+  }, [])
 
   const handleApprove = useCallback(() => {
     if (!session) return
@@ -432,6 +453,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   const canLeaveSession = (isGuest && session.status === "ATIVA") || isPendingGuest
 
   const canUpload = session.podeUpload ?? false
+  const canChat = session.status === "ATIVA"
 
   const mergedArquivos = arquivos.map((arq) => {
     const upload = uploads.get(arq.id)
@@ -469,52 +491,68 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         totalArquivos={session.totalArquivosTransferidos}
       />
 
-      <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-4 space-y-4">
-        {isWaitingApproval && (
-          <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4 text-center">
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-8 w-8 animate-pulse rounded-full bg-blue-500/20 flex items-center justify-center">
-                <span className="text-blue-400 text-lg">⏳</span>
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-6xl px-4 py-4 lg:flex lg:items-start lg:gap-6">
+          <section className="flex-1 space-y-4 lg:max-w-3xl">
+            {isWaitingApproval && (
+              <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-8 w-8 animate-pulse rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <span className="text-blue-400 text-lg">⏳</span>
+                  </div>
+                  <p className="text-sm font-medium text-blue-400">
+                    Aguardando aprovação do criador da sessão
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Você poderá transferir arquivos assim que sua entrada for aprovada
+                  </p>
+                  <button
+                    onClick={handleLeaveSession}
+                    className="mt-2 text-xs text-red-400 hover:text-red-300 underline"
+                  >
+                    Cancelar e sair da sessão
+                  </button>
+                </div>
               </div>
-              <p className="text-sm font-medium text-blue-400">
-                Aguardando aprovação do criador da sessão
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Você poderá transferir arquivos assim que sua entrada for aprovada
-              </p>
-              <button
-                onClick={handleLeaveSession}
-                className="mt-2 text-xs text-red-400 hover:text-red-300 underline"
-              >
-                Cancelar e sair da sessão
-              </button>
-            </div>
+            )}
+
+            {!isWaitingApproval && !isLoadingRecovery && recoverableUploads.length > 0 && (
+              <RecoverableUploads
+                uploads={recoverableUploads}
+                onResume={handleResumeUpload}
+                onDiscard={handleDiscardUpload}
+                onDiscardAll={handleDiscardAll}
+                isResuming={isUploading}
+              />
+            )}
+
+            {canUpload && <UploadZone onUpload={handleUpload} isUploading={isUploading} />}
+
+            <FileList
+              arquivos={mergedArquivos}
+              espacoDisponivel={espacoDisponivel}
+              currentUserId={user?.id ?? ""}
+              currentUserName={user?.name}
+              onDownload={handleDownload}
+              onDelete={handleDelete}
+              onCancel={handleCancelUpload}
+              sessionStatus={session.status}
+            />
+          </section>
+          <div className="mt-6 lg:mt-0 lg:w-90 lg:shrink-0">
+            <ChatPanel
+              sessaoId={session.id}
+              currentUserId={user?.id ?? ""}
+              currentUserName={user?.name}
+              isOpen={isChatOpen}
+              onOpenChange={setIsChatOpen}
+              isConnected={isConnected}
+              canChat={canChat}
+              subscribe={subscribe}
+              send={send}
+            />
           </div>
-        )}
-
-        {/* Uploads retomáveis - mostra apenas se tiver sessão ativa e não estiver aguardando aprovação */}
-        {!isWaitingApproval && !isLoadingRecovery && recoverableUploads.length > 0 && (
-          <RecoverableUploads
-            uploads={recoverableUploads}
-            onResume={handleResumeUpload}
-            onDiscard={handleDiscardUpload}
-            onDiscardAll={handleDiscardAll}
-            isResuming={isUploading}
-          />
-        )}
-
-        {canUpload && <UploadZone onUpload={handleUpload} isUploading={isUploading} />}
-
-        <FileList
-          arquivos={mergedArquivos}
-          espacoDisponivel={espacoDisponivel}
-          currentUserId={user?.id ?? ""}
-          currentUserName={user?.name}
-          onDownload={handleDownload}
-          onDelete={handleDelete}
-          onCancel={handleCancelUpload}
-          sessionStatus={session.status}
-        />
+        </div>
       </main>
     </div>
   )

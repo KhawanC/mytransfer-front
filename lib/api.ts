@@ -224,4 +224,12 @@ export async function deleteFile(arquivoId: string): Promise<void> {
   return api(`/api/transferencia/arquivo/${arquivoId}`, { method: "DELETE" })
 }
 
+export async function getChatHistory(sessaoId: string): Promise<import("@/types").ChatHistorico> {
+  return api(`/api/transferencia/sessao/${sessaoId}/chat/historico`)
+}
+
+export async function markChatAsRead(sessaoId: string): Promise<void> {
+  return api(`/api/transferencia/sessao/${sessaoId}/chat/leitura`, { method: "POST" })
+}
+
 export { ApiError }
