@@ -203,6 +203,10 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           revalidateLimites()
           break
         }
+        case "ARQUIVO_PROCESSANDO":
+          fetchSession()
+          revalidateLimites()
+          break
         case "ARQUIVO_CONVERTIDO":
           const dadosConv = notif.dados as { 
             arquivoOriginalId: string
