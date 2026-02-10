@@ -442,7 +442,6 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           arquivos={mergedArquivos}
           espacoDisponivel={espacoDisponivel}
           onCancelUpload={handleCancelUpload}
-        />
           currentUserId={user?.id ?? ""}
           currentUserName={user?.name}
           onDownload={handleDownload}
