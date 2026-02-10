@@ -146,6 +146,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         case "SESSAO_EXPIRADA":
           toast.warning("Sessão expirada")
           setSession((prev) => (prev ? { ...prev, status: "EXPIRADA" } : prev))
+          setTimeout(() => router.push("/dashboard"), 2000)
           break
         case "UPLOAD_INICIADO":
           fetchSession()
