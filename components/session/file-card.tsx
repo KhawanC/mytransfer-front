@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { Arquivo, FormatoImagem } from "@/types"
+import type { Arquivo, FormatoConversao } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -60,9 +60,9 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
   const [showDelete, setShowDelete] = useState(false)
   const [showCancel, setShowCancel] = useState(false)
   const [showConversionPanel, setShowConversionPanel] = useState(false)
-  const [formatosDisponiveis, setFormatosDisponiveis] = useState<FormatoImagem[]>([])
+  const [formatosDisponiveis, setFormatosDisponiveis] = useState<FormatoConversao[]>([])
   const [loadingFormatos, setLoadingFormatos] = useState(false)
-  const [selectedFormato, setSelectedFormato] = useState<FormatoImagem | null>(null)
+  const [selectedFormato, setSelectedFormato] = useState<FormatoConversao | null>(null)
   const [showConversionModal, setShowConversionModal] = useState(false)
   
   const iconElement = getFileIconElement(arquivo.tipoMime)
@@ -101,7 +101,7 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
       .finally(() => setLoadingFormatos(false))
   }
 
-  const handleFormatoClick = (formato: FormatoImagem) => {
+  const handleFormatoClick = (formato: FormatoConversao) => {
     setSelectedFormato(formato)
     setShowConversionModal(true)
   }

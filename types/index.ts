@@ -2,6 +2,10 @@ export type UserType = 'GUEST' | 'FREE' | 'PREMIUM'
 
 export type FormatoImagem = 'JPEG' | 'JPG' | 'PNG' | 'BMP' | 'WEBP' | 'SVG' | 'TIFF' | 'ICO'
 
+export type FormatoVideo = 'MP4' | 'MKV' | 'WEBM' | 'MOV' | 'AVI' | 'FLV' | '3GP' | 'MPEG' | 'GIF'
+
+export type FormatoConversao = FormatoImagem | FormatoVideo
+
 export interface User {
   id: string
   email: string

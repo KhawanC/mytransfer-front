@@ -192,14 +192,14 @@ export async function getSessaoEstatisticas(sessaoId: string): Promise<import("@
 /**
  * Obtém os formatos disponíveis para conversão de um arquivo.
  */
-export async function getFormatosDisponiveis(arquivoId: string): Promise<import("@/types").FormatoImagem[]> {
+export async function getFormatosDisponiveis(arquivoId: string): Promise<import("@/types").FormatoConversao[]> {
   return api(`/api/transferencia/arquivo/${arquivoId}/formatos-disponiveis`)
 }
 
 /**
  * Solicita a conversão de um arquivo para um novo formato.
  */
-export async function converterArquivo(arquivoId: string, formato: import("@/types").FormatoImagem): Promise<{ message: string }> {
+export async function converterArquivo(arquivoId: string, formato: import("@/types").FormatoConversao): Promise<{ message: string }> {
   return api(`/api/transferencia/arquivo/${arquivoId}/converter`, {
     method: "POST",
     body: JSON.stringify({ formato }),

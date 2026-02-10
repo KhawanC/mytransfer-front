@@ -12,13 +12,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import type { FormatoImagem } from "@/types"
+import type { FormatoConversao } from "@/types"
 
 interface ConversionModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
-  formato: FormatoImagem | null
+  formato: FormatoConversao | null
   nomeArquivo: string
 }
 
