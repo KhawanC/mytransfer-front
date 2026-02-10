@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { getSessaoEstatisticas } from "@/lib/api"
 import { useWebSocket } from "./use-websocket"
-import type { SessaoEstatisticas, TipoNotificacao } from "@/types"
+import type { SessaoEstatisticas, TipoNotificacao, NotificacaoResponse } from "@/types"
 
 const CACHE_DURATION_MS = 5 * 60 * 1000
 
@@ -62,7 +62,8 @@ export function useSessionLimits(sessaoId: string) {
       "UPLOAD_COMPLETO"
     ]
 
-    const unsubscribe = subscribe(`/topic/sessao/${sessaoId}`, (notification) => {
+    const unsubscribe = subscribe(`/topic/sessao/${sessaoId}`, (body) => {
+      const notification = body as NotificacaoResponse
       if (invalidationTypes.includes(notification.tipo)) {
         revalidate()
       }
