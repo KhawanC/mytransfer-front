@@ -170,11 +170,11 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         }
         case "ARQUIVO_DISPONIVEL":
           // Atualiza o arquivo para COMPLETO quando realmente disponível
-          const dados = notif.dados as { arquivoId: string; nomeArquivo: string; urlDownload: string }
+          const dados = notif.dados as { arquivoId: string; nomeArquivo: string; urlDownload: string; conversivel: boolean }
           setArquivos((prev) =>
             prev.map((arq) =>
               arq.id === dados.arquivoId
-                ? { ...arq, status: "COMPLETO", progressoUpload: 100 }
+                ? { ...arq, status: "COMPLETO", progressoUpload: 100, conversivel: dados.conversivel }
                 : arq,
             ),
           )
