@@ -157,6 +157,20 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
             )}
           </div>
         )
+      case "BLOQUEADO":
+        return (
+          <div className="space-y-1 w-full">
+            <div className="flex items-center gap-1.5 text-xs text-red-400">
+              <AlertCircle className="h-3 w-3" />
+              Arquivo bloqueado
+            </div>
+            {arquivo.mensagemErro && (
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {arquivo.mensagemErro}
+              </p>
+            )}
+          </div>
+        )
       default:
         return (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

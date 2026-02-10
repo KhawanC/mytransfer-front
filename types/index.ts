@@ -21,7 +21,7 @@ export interface AuthResponse {
 
 export type StatusSessao = "AGUARDANDO" | "AGUARDANDO_APROVACAO" | "ATIVA" | "EXPIRADA" | "ENCERRADA"
 
-export type StatusArquivo = "PENDENTE" | "ENVIANDO" | "PROCESSANDO" | "COMPLETO" | "ERRO"
+export type StatusArquivo = "PENDENTE" | "ENVIANDO" | "PROCESSANDO" | "COMPLETO" | "BLOQUEADO" | "ERRO"
 
 export interface SessaoLimites {
   maxArquivos: number | null
@@ -120,6 +120,7 @@ export type TipoNotificacao =
   | "UPLOAD_COMPLETO"
   | "UPLOAD_ERRO"
   | "ARQUIVO_DISPONIVEL"
+  | "ARQUIVO_BLOQUEADO"
   | "ARQUIVO_CONVERTIDO"
   | "SOLICITACAO_ENTRADA"
   | "SOLICITACAO_ENTRADA_CRIADOR"

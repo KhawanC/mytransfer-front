@@ -59,6 +59,7 @@ export function useSessionLimits(sessaoId: string) {
     const invalidationTypes: TipoNotificacao[] = [
       "ARQUIVO_DISPONIVEL",
       "ARQUIVO_CONVERTIDO",
+      "ARQUIVO_BLOQUEADO",
       "UPLOAD_COMPLETO"
     ]
 

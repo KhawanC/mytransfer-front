@@ -189,6 +189,20 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           toast.success(`${dados.nomeArquivo} disponível para download`)
           revalidateLimites()
           break
+        case "ARQUIVO_BLOQUEADO": {
+          const dadosBloq = notif.dados as { arquivoId: string; motivo?: string }
+          setArquivos((prev) =>
+            prev.map((arq) =>
+              arq.id === dadosBloq.arquivoId
+                ? { ...arq, status: "BLOQUEADO", mensagemErro: notif.mensagem }
+                : arq,
+            ),
+          )
+          clearUpload(dadosBloq.arquivoId)
+          toast.error(notif.mensagem)
+          revalidateLimites()
+          break
+        }
         case "ARQUIVO_CONVERTIDO":
           const dadosConv = notif.dados as { 
             arquivoOriginalId: string
