@@ -8,7 +8,7 @@ import { useWebSocket } from "@/hooks/use-websocket"
 import { useUpload } from "@/hooks/use-upload"
 import { useUploadRecovery } from "@/hooks/use-upload-recovery"
 import { useSessionLimits } from "@/hooks/use-session-limits"
-import type { Sessao, Arquivo, NotificacaoResponse, ProgressoUploadResponse } from "@/types"
+import type { Sessao, Arquivo, NotificacaoResponse, ProgressoUploadResponse, PendenteEntrada } from "@/types"
 import type { PersistedUploadSession } from "@/lib/upload-storage"
 import { SessionHeader } from "@/components/session/session-header"
 import { SessionLimitsInfo } from "@/components/session/session-limits-info"
@@ -19,6 +19,7 @@ import { RecoverableUploads } from "@/components/session/recoverable-uploads"
 import { ChatPanel } from "@/components/session/chat-panel"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
+import { Clock } from "lucide-react"
 
 export default function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -29,7 +30,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   const [arquivos, setArquivos] = useState<Arquivo[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showApprovalAlert, setShowApprovalAlert] = useState(false)
-  const [pendingUserName, setPendingUserName] = useState<string>("")
+  const [pendingQueue, setPendingQueue] = useState<PendenteEntrada[]>([])
   const [isChatOpen, setIsChatOpen] = useState(false)
 
   const { isConnected, subscribe, send } = useWebSocket()
@@ -51,6 +52,15 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         api<Arquivo[]>(`/api/transferencia/sessao/${id}/arquivos`),
       ])
       setSession(sessao)
+
+      const pendentes = sessao.usuariosPendentes ?? []
+      if (sessao.usuarioCriadorId === user?.id) {
+        setPendingQueue(pendentes)
+        setShowApprovalAlert(pendentes.length > 0)
+      } else {
+        setPendingQueue([])
+        setShowApprovalAlert(false)
+      }
       
       setArquivos((prev) => {
         const tempFiles = prev.filter(a => a.id.startsWith('temp_'))
@@ -68,12 +78,6 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       })
       
       // Se o usuário é o criador e há um usuário aguardando aprovação, mostra o dialog
-      if (sessao.usuarioCriadorId === user?.id && 
-          sessao.status === "AGUARDANDO_APROVACAO" && 
-          sessao.nomeUsuarioConvidadoPendente) {
-        setPendingUserName(sessao.nomeUsuarioConvidadoPendente)
-        setShowApprovalAlert(true)
-      }
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) return
@@ -114,17 +118,29 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
 
   const handleApprove = useCallback(() => {
     if (!session) return
-    send("/app/sessao/aprovar", { sessaoId: session.id })
-    setShowApprovalAlert(false)
+    const pendente = pendingQueue[0]
+    if (!pendente) return
+    send("/app/sessao/aprovar", { sessaoId: session.id, usuarioId: pendente.usuarioId })
+    setPendingQueue((prev) => {
+      const next = prev.slice(1)
+      setShowApprovalAlert(next.length > 0)
+      return next
+    })
     toast.success("Entrada aprovada!")
-  }, [session, send])
+  }, [session, send, pendingQueue])
 
   const handleReject = useCallback(() => {
     if (!session) return
-    send("/app/sessao/rejeitar", { sessaoId: session.id })
-    setShowApprovalAlert(false)
+    const pendente = pendingQueue[0]
+    if (!pendente) return
+    send("/app/sessao/rejeitar", { sessaoId: session.id, usuarioId: pendente.usuarioId })
+    setPendingQueue((prev) => {
+      const next = prev.slice(1)
+      setShowApprovalAlert(next.length > 0)
+      return next
+    })
     toast.info("Entrada rejeitada")
-  }, [session, send])
+  }, [session, send, pendingQueue])
 
   useEffect(() => {
     if (!isConnected || !session) return
@@ -133,9 +149,6 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       const notif = data as NotificacaoResponse
       switch (notif.tipo) {
         case "SOLICITACAO_ENTRADA": {
-          const dados = notif.dados as { usuarioConvidadoPendenteId: string; nomeUsuario: string }
-          setPendingUserName(dados.nomeUsuario)
-          setShowApprovalAlert(true)
           toast.info(notif.mensagem)
           fetchSession()
           break
@@ -144,13 +157,17 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
           toast.success("Entrada aprovada!")
           fetchSession()
           break
-        case "ENTRADA_REJEITADA":
-          toast.error("Sua entrada foi rejeitada")
-          if (session.usuarioCriadorId !== user?.id) {
-            setTimeout(() => router.push("/dashboard"), 2000)
+        case "ENTRADA_REJEITADA": {
+          const rejeitadoId = notif.dados as string | undefined
+          if (!rejeitadoId || rejeitadoId === user?.id) {
+            toast.error("Sua entrada foi rejeitada")
+            if (session.usuarioCriadorId !== user?.id) {
+              setTimeout(() => router.push("/dashboard"), 2000)
+            }
           }
           fetchSession()
           break
+        }
         case "USUARIO_ENTROU":
           toast.info("Um usuário entrou na sessão")
           fetchSession()
@@ -447,9 +464,12 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   if (!session) return null
 
   const isCreator = session.usuarioCriadorId === user?.id
-  const isGuest = session.usuarioConvidadoId === user?.id
-  const isPendingGuest = session.usuarioConvidadoPendenteId === user?.id
-  const isWaitingApproval = session.status === "AGUARDANDO_APROVACAO" && isPendingGuest
+  const approvedIds = session.usuariosConvidadosIds ?? (session.usuarioConvidadoId ? [session.usuarioConvidadoId] : [])
+  const pendingIds = session.usuariosPendentes?.map((pendente) => pendente.usuarioId)
+    ?? (session.usuarioConvidadoPendenteId ? [session.usuarioConvidadoPendenteId] : [])
+  const isGuest = approvedIds.includes(user?.id ?? "")
+  const isPendingGuest = pendingIds.includes(user?.id ?? "")
+  const isWaitingApproval = isPendingGuest
   const canLeaveSession = (isGuest && session.status === "ATIVA") || isPendingGuest
 
   const canUpload = session.podeUpload ?? false
@@ -473,7 +493,8 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
     <div className="min-h-dvh flex flex-col">
       <PendingApprovalAlert
         isOpen={showApprovalAlert}
-        userName={pendingUserName}
+        pendingUser={pendingQueue[0] ?? null}
+        pendingCount={pendingQueue.length}
         onApprove={handleApprove}
         onReject={handleReject}
       />
@@ -484,6 +505,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         onEndSession={handleEndSession}
         onLeaveSession={canLeaveSession ? handleLeaveSession : undefined}
         isConnected={isConnected}
+        currentUserId={user?.id}
       />
 
       <SessionLimitsInfo 
@@ -498,7 +520,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
               <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <div className="h-8 w-8 animate-pulse rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <span className="text-blue-400 text-lg">⏳</span>
+                    <Clock className="h-4 w-4 text-blue-400" />
                   </div>
                   <p className="text-sm font-medium text-blue-400">
                     Aguardando aprovação do criador da sessão

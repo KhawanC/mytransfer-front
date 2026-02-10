@@ -11,22 +11,30 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { UserCheck, UserX } from "lucide-react"
+import type { PendenteEntrada } from "@/types"
 
 interface PendingApprovalAlertProps {
   isOpen: boolean
-  userName: string
+  pendingUser: PendenteEntrada | null
+  pendingCount: number
   onApprove: () => void
   onReject: () => void
 }
 
 export function PendingApprovalAlert({
   isOpen,
-  userName,
+  pendingUser,
+  pendingCount,
   onApprove,
   onReject,
 }: PendingApprovalAlertProps) {
+  const nomeUsuario = pendingUser?.nomeUsuario ?? ""
+  const restante = Math.max(0, pendingCount - 1)
+
+  const open = isOpen && !!pendingUser
+
   return (
-    <AlertDialog open={isOpen}>
+    <AlertDialog open={open}>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
@@ -34,8 +42,13 @@ export function PendingApprovalAlert({
             Nova Solicitação de Entrada
           </AlertDialogTitle>
           <AlertDialogDescription className="text-base pt-2">
-            <span className="font-semibold text-foreground">{userName}</span> está solicitando entrada
+            <span className="font-semibold text-foreground">{nomeUsuario}</span> está solicitando entrada
             na sua sessão de transferência.
+            {restante > 0 && (
+              <span className="block text-sm text-muted-foreground mt-2">
+                Outras solicitações pendentes: {restante}
+              </span>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-col sm:flex-row gap-2">

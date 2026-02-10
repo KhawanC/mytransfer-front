@@ -27,13 +27,16 @@ interface SessionHeaderProps {
   onEndSession: () => void
   onLeaveSession?: () => void
   isConnected: boolean
+  currentUserId?: string
 }
 
-export function SessionHeader({ session, isCreator, onEndSession, onLeaveSession, isConnected }: SessionHeaderProps) {
+export function SessionHeader({ session, isCreator, onEndSession, onLeaveSession, isConnected, currentUserId }: SessionHeaderProps) {
   const router = useRouter()
   const { formatted, isExpired } = useCountdown(session.expiraEm)
   const [showQr, setShowQr] = useState(false)
   const isActive = session.estaAtiva ?? false
+  const pendingCount = session.usuariosPendentes?.length ?? 0
+  const isPendingUser = !!currentUserId && (session.usuariosPendentes ?? []).some((p) => p.usuarioId === currentUserId)
 
   const shareUrl =
     typeof window !== "undefined"
@@ -188,15 +191,15 @@ export function SessionHeader({ session, isCreator, onEndSession, onLeaveSession
           </div>
         </div>
 
-        {session.status === "AGUARDANDO_APROVACAO" && !isCreator && (
+        {isPendingUser && !isCreator && (
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2 text-xs text-blue-400">
-            ⏳ Aguardando aprovação do criador da sessão...
+            Aguardando aprovação do criador da sessão...
           </div>
         )}
 
-        {session.status === "AGUARDANDO_APROVACAO" && isCreator && session.nomeUsuarioConvidadoPendente && (
+        {isCreator && pendingCount > 0 && (
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2 text-xs text-blue-400">
-            👤 <span className="font-semibold">{session.nomeUsuarioConvidadoPendente}</span> está aguardando sua aprovação
+            <span className="font-semibold">{pendingCount}</span> solicitação(ões) aguardando sua aprovação
           </div>
         )}
       </div>

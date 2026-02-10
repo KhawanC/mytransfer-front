@@ -54,6 +54,8 @@ export interface Sessao {
   usuarioConvidadoId?: string
   usuarioConvidadoPendenteId?: string
   nomeUsuarioConvidadoPendente?: string
+  usuariosConvidadosIds?: string[]
+  usuariosPendentes?: PendenteEntrada[]
   totalArquivosTransferidos: number
   criadaEm: string
   expiraEm: string
@@ -61,6 +63,12 @@ export interface Sessao {
   podeUpload?: boolean
   podeEncerrar?: boolean
   estaAtiva?: boolean
+}
+
+export interface PendenteEntrada {
+  usuarioId: string
+  nomeUsuario: string
+  solicitadoEm: string
 }
 
 export interface Arquivo {
@@ -137,6 +145,40 @@ export type TipoNotificacao =
   | "SOLICITACAO_ENTRADA_CRIADOR"
   | "ENTRADA_APROVADA"
   | "ENTRADA_REJEITADA"
+  | "ASSINATURA_PAGA"
+
+export type StatusAssinatura = "PENDENTE" | "ATIVA" | "CANCELADA" | "EXPIRADA" | "FALHA"
+
+export interface PlanoAssinatura {
+  id: string
+  nome: string
+  precoCentavos: number
+  duracaoDias: number
+}
+
+export interface CheckoutResponse {
+  assinaturaId: string
+  planoId: string
+  brCode: string
+  qrCodeImageUrl: string
+  paymentLinkUrl?: string
+  expiraEm: string
+}
+
+export interface AssinaturaStatus {
+  assinaturaId?: string
+  planoId?: string
+  planoNome?: string
+  status: StatusAssinatura
+  periodoInicio?: string
+  periodoFim?: string
+  brCode?: string
+  qrCodeImageUrl?: string
+  paymentLinkUrl?: string
+  pagamentoExpiraEm?: string
+  cancelarAoFinalPeriodo?: boolean
+  celebracaoExibida?: boolean
+}
 
 export interface DownloadResponse {
   arquivoId: string

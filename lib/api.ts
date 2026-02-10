@@ -232,4 +232,31 @@ export async function markChatAsRead(sessaoId: string): Promise<void> {
   return api(`/api/transferencia/sessao/${sessaoId}/chat/leitura`, { method: "POST" })
 }
 
+export async function listSubscriptionPlans(): Promise<import("@/types").PlanoAssinatura[]> {
+  return api("/api/assinaturas/planos")
+}
+
+export async function createSubscriptionCheckout(planoId: string): Promise<import("@/types").CheckoutResponse> {
+  return api("/api/assinaturas/checkout", {
+    method: "POST",
+    body: JSON.stringify({ planoId }),
+  })
+}
+
+export async function getSubscriptionStatus(): Promise<import("@/types").AssinaturaStatus> {
+  return api("/api/assinaturas/status")
+}
+
+export async function cancelSubscription(): Promise<import("@/types").AssinaturaStatus> {
+  return api("/api/assinaturas/cancelar", { method: "POST" })
+}
+
+export async function markSubscriptionCelebration(): Promise<import("@/types").AssinaturaStatus> {
+  return api("/api/assinaturas/celebration", { method: "POST" })
+}
+
+export async function deleteAccount(): Promise<void> {
+  return api("/api/conta", { method: "DELETE" })
+}
+
 export { ApiError }
