@@ -153,6 +153,20 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         case "UPLOAD_COMPLETO":
           // Não faz nada aqui, espera ARQUIVO_DISPONIVEL
           break
+        case "UPLOAD_ERRO": {
+          const dados = notif.dados as string
+          setArquivos((prev) =>
+            prev.map((arq) =>
+              arq.id === dados
+                ? { ...arq, status: "ERRO", mensagemErro: notif.mensagem }
+                : arq,
+            ),
+          )
+          toast.error(notif.mensagem)
+          clearUpload(dados)
+          revalidateLimites()
+          break
+        }
         case "ARQUIVO_DISPONIVEL":
           // Atualiza o arquivo para COMPLETO quando realmente disponível
           const dados = notif.dados as { arquivoId: string; nomeArquivo: string; urlDownload: string }

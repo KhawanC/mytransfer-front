@@ -148,4 +148,11 @@ export async function converterArquivo(arquivoId: string, formato: import("@/typ
   })
 }
 
+/**
+ * Exclui um arquivo com erro ou pendente.
+ */
+export async function deleteFile(arquivoId: string): Promise<void> {
+  return api(`/api/transferencia/arquivo/${arquivoId}`, { method: "DELETE" })
+}
+
 export { ApiError }

@@ -101,7 +101,7 @@ export function CreateSession({ onCreated, disabled, userType }: CreateSessionPr
                     <p className="font-medium text-amber-400">Limites de Convidado</p>
                     <ul className="text-muted-foreground space-y-0.5 ml-2">
                       <li>• Duração: 10 minutos</li>
-                      <li>• Máximo: 10 arquivos de 150MB cada</li>
+                      <li>• Máximo: 10 arquivos de 25MB cada</li>
                     </ul>
                     <p className="text-muted-foreground">
                       Faça login para limites maiores (30min, 25 arquivos de 250MB)

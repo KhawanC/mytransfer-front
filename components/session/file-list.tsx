@@ -44,7 +44,7 @@ export function FileList({ arquivos, currentUserId, currentUserName, onDownload,
           onDownload={onDownload}
           onDelete={onDelete}
           onCancel={onCancel}
-          canDelete={arq.remetenteId === currentUserId}
+          canDelete={arq.remetenteId === currentUserId && (arq.status === "COMPLETO" || arq.status === "ERRO")}
           espacoDisponivel={espacoDisponivel}
         />
       ))}

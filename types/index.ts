@@ -69,6 +69,7 @@ export interface Arquivo {
   progressoUpload: number
   totalChunks: number
   chunksRecebidos: number
+  mensagemErro?: string
   criadoEm: string
   atualizadoEm: string
   conversivel?: boolean

@@ -133,9 +133,16 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
         )
       case "ERRO":
         return (
-          <div className="flex items-center gap-1.5 text-xs text-red-400">
-            <AlertCircle className="h-3 w-3" />
-            Erro no upload
+          <div className="space-y-1 w-full">
+            <div className="flex items-center gap-1.5 text-xs text-red-400">
+              <AlertCircle className="h-3 w-3" />
+              Erro no upload
+            </div>
+            {arquivo.mensagemErro && (
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {arquivo.mensagemErro}
+              </p>
+            )}
           </div>
         )
       default:
