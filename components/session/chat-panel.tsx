@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { getChatHistory, markChatAsRead } from "@/lib/api"
 import type { ChatDigitandoEvent, ChatMensagem } from "@/types"
-import { MessageCircle, Minus, Send } from "lucide-react"
+import { ArrowLeft, MessageCircle, Minus, Send } from "lucide-react"
 
 interface ChatPanelProps {
   sessaoId: string
@@ -163,7 +163,7 @@ export function ChatPanel({
     [handleSend],
   )
 
-  const renderMensagem = useCallback((texto: string) => {
+  const renderMensagem = useCallback((texto: string, isSelf: boolean) => {
     const regex = /(https?:\/\/[^\s]+)/g
     const parts = texto.split(regex)
 
@@ -175,7 +175,11 @@ export function ChatPanel({
             href={part}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary underline decoration-primary/60 underline-offset-4 hover:decoration-primary"
+            className={`break-all underline underline-offset-4 transition-opacity hover:opacity-80 ${
+              isSelf
+                ? "text-primary-foreground decoration-primary-foreground/80"
+                : "text-primary decoration-primary/60 hover:decoration-primary"
+            }`}
           >
             {part}
           </a>
@@ -189,6 +193,14 @@ export function ChatPanel({
   const chatHeader = (
     <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
       <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 cursor-pointer lg:hidden"
+          onClick={() => onOpenChange(false)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-primary">
           <MessageCircle className="h-4 w-4" />
         </div>
@@ -212,7 +224,7 @@ export function ChatPanel({
 
   const chatBody = (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto overflow-x-hidden px-4 py-4">
         {mensagens.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border/60 bg-secondary/30 px-4 py-6 text-center text-sm text-muted-foreground">
             Inicie a conversa enviando uma mensagem
@@ -228,7 +240,7 @@ export function ChatPanel({
             return (
               <div key={msg.id} className={`flex ${isSelf ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm transition-all duration-200 animate-in fade-in slide-in-from-bottom-1 ${
+                  className={`max-w-[80%] min-w-0 rounded-2xl px-4 py-2 text-sm shadow-sm transition-all duration-200 animate-in fade-in slide-in-from-bottom-1 ${
                     isSelf
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary/60 text-foreground"
@@ -237,8 +249,8 @@ export function ChatPanel({
                   <div className="text-xs font-semibold opacity-80">
                     {isSelf ? currentUserName ?? "Você" : msg.remetenteNome}
                   </div>
-                  <div className="mt-1 whitespace-pre-wrap wrap-break-word">
-                    {renderMensagem(msg.conteudo)}
+                  <div className="mt-1 whitespace-pre-wrap break-words">
+                    {renderMensagem(msg.conteudo, isSelf)}
                   </div>
                   <div className="mt-2 text-[10px] opacity-70">{horario}</div>
                 </div>
@@ -256,7 +268,7 @@ export function ChatPanel({
             placeholder={canChat ? "Escreva sua mensagem..." : "Chat disponível apenas em sessões ativas"}
             rows={1}
             disabled={!canChat}
-            className="min-h-11 max-h-32 flex-1 resize-none rounded-xl border border-border/60 bg-background/70 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-11 max-h-32 flex-1 resize-none rounded-xl border border-border/60 bg-background/70 px-3 py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:cursor-not-allowed disabled:opacity-60 lg:text-sm"
           />
           <Button
             type="button"
@@ -291,7 +303,7 @@ export function ChatPanel({
       )}
 
       {isOpen && (
-        <div className="fixed inset-0 z-40 flex items-end bg-black/40 backdrop-blur-sm lg:hidden">
+        <div className="fixed inset-0 z-40 flex items-end overflow-x-hidden bg-black/40 backdrop-blur-sm lg:hidden">
           <div className="flex h-[85vh] w-full flex-col rounded-t-2xl border border-border/50 bg-background shadow-2xl">
             {chatHeader}
             {chatBody}
