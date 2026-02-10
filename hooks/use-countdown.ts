@@ -22,8 +22,6 @@ export function useCountdown(targetDate: string | null): CountdownReturn {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    setTotalSeconds(getRemaining())
-
     intervalRef.current = setInterval(() => {
       const remaining = getRemaining()
       setTotalSeconds(remaining)

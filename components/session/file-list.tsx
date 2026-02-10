@@ -31,6 +31,7 @@ export function FileList({ arquivos, currentUserId, currentUserName, onDownload,
       ENVIANDO: 0,
       PROCESSANDO: 0,
       COMPLETO: 1,
+      BLOQUEADO: 2,
       ERRO: 2
     }
 

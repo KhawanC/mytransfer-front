@@ -40,3 +40,58 @@ export function formatRelativeTime(dateString: string): string {
     minute: "2-digit"
   })
 }
+
+function normalizeMimeToExtensionLabel(mime?: string): string | null {
+  if (!mime) return null
+
+  const lower = mime.toLowerCase()
+
+  if (lower.includes("wordprocessingml.document")) return "DOCX"
+  if (lower.includes("spreadsheetml.sheet")) return "XLSX"
+  if (lower.includes("presentationml.presentation")) return "PPTX"
+
+  if (lower.includes("x-7z-compressed")) return "7Z"
+  if (lower.includes("x-rar-compressed")) return "RAR"
+  if (lower.endsWith("/zip") || lower.includes("+zip")) return "ZIP"
+
+  if (lower.endsWith("/plain")) return "TXT"
+  if (lower.endsWith("/jpeg")) return "JPG"
+
+  const slashIndex = lower.indexOf("/")
+  const subtype = slashIndex >= 0 ? lower.slice(slashIndex + 1) : lower
+  const lastDot = subtype.lastIndexOf(".")
+  const raw = (lastDot >= 0 ? subtype.slice(lastDot + 1) : subtype).trim()
+
+  if (!raw) return null
+  return raw.toUpperCase()
+}
+
+function normalizeFilenameToExtensionLabel(filename: string): string | null {
+  const trimmed = (filename ?? "").trim()
+  if (!trimmed) return null
+
+  const lastDot = trimmed.lastIndexOf(".")
+  if (lastDot <= 0 || lastDot === trimmed.length - 1) return null
+
+  const ext = trimmed.slice(lastDot + 1).trim()
+  if (!ext) return null
+
+  return ext.toUpperCase()
+}
+
+export function getFileExtensionLabel(params: {
+  nomeOriginal: string
+  tipoMime?: string
+  formatoConvertido?: string
+  isConverted?: boolean
+}): string {
+  if (params.isConverted && params.formatoConvertido) {
+    return String(params.formatoConvertido).trim().toUpperCase()
+  }
+
+  return (
+    normalizeFilenameToExtensionLabel(params.nomeOriginal) ||
+    normalizeMimeToExtensionLabel(params.tipoMime) ||
+    "ARQUIVO"
+  )
+}

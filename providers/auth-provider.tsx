@@ -23,6 +23,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const isFetchingRef = useRef(false)
 
+  const logout = useCallback(() => {
+    clearTokens()
+    setUser(null)
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current)
+    }
+  }, [])
+
   const fetchUser = useCallback(async () => {
     if (isFetchingRef.current) return
     isFetchingRef.current = true
@@ -134,14 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return localUser
       })
       setIsLoading(false)
-    }
-  }, [])
-
-  const logout = useCallback(() => {
-    clearTokens()
-    setUser(null)
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current)
     }
   }, [])
 

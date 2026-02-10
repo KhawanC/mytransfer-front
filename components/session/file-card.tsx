@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import type { Arquivo, FormatoImagem } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,7 @@ import {
   ChevronLeft,
   FileType,
 } from "lucide-react"
-import { formatBytes, formatRelativeTime, cn } from "@/lib/utils"
+import { formatBytes, formatRelativeTime, cn, getFileExtensionLabel } from "@/lib/utils"
 import { ConversionModal } from "./conversion-modal"
 import { ApiError, getFormatosDisponiveis, converterArquivo } from "@/lib/api"
 import { toast } from "sonner"
@@ -47,13 +47,13 @@ interface FileCardProps {
   espacoDisponivel: number
 }
 
-function getFileIcon(mime: string) {
-  if (mime.startsWith("image/")) return FileImage
-  if (mime.startsWith("video/")) return FileVideo
-  if (mime.startsWith("audio/")) return FileAudio
+function getFileIconElement(mime: string) {
+  if (mime.startsWith("image/")) return <FileImage className="h-5 w-5 text-muted-foreground" />
+  if (mime.startsWith("video/")) return <FileVideo className="h-5 w-5 text-muted-foreground" />
+  if (mime.startsWith("audio/")) return <FileAudio className="h-5 w-5 text-muted-foreground" />
   if (mime.includes("pdf") || mime.includes("document") || mime.includes("text"))
-    return FileText
-  return File
+    return <FileText className="h-5 w-5 text-muted-foreground" />
+  return <File className="h-5 w-5 text-muted-foreground" />
 }
 
 export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, canDelete, currentUserName, espacoDisponivel }: FileCardProps) {
@@ -65,30 +65,41 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
   const [selectedFormato, setSelectedFormato] = useState<FormatoImagem | null>(null)
   const [showConversionModal, setShowConversionModal] = useState(false)
   
-  const Icon = getFileIcon(arquivo.tipoMime)
+  const iconElement = getFileIconElement(arquivo.tipoMime)
   const senderName = arquivo.nomeRemetente || (isOwner ? "Você" : "Outro usuário")
   const timeAgo = formatRelativeTime(arquivo.criadoEm)
 
+  const isConverted = Boolean(arquivo.arquivoOriginalId)
+  const extensionLabel = getFileExtensionLabel({
+    nomeOriginal: arquivo.nomeOriginal,
+    tipoMime: arquivo.tipoMime,
+    formatoConvertido: arquivo.formatoConvertido,
+    isConverted,
+  })
+
   const podeConverter = arquivo.conversivel && arquivo.status === "COMPLETO" && espacoDisponivel > 0
 
-  useEffect(() => {
-    if (showConversionPanel && formatosDisponiveis.length === 0 && !loadingFormatos) {
-      setLoadingFormatos(true)
-      getFormatosDisponiveis(arquivo.id)
-        .then(setFormatosDisponiveis)
-        .catch((err) => {
-          if (err instanceof ApiError) {
-            if (err.status === 404) toast.error("Arquivo não encontrado")
-            else if (err.status === 410) toast.warning("Sessão expirada")
-            else toast.error(err.message)
-          } else {
-            toast.error("Erro ao carregar formatos disponíveis")
-          }
-          console.error(err)
-        })
-        .finally(() => setLoadingFormatos(false))
-    }
-  }, [showConversionPanel, arquivo.id, formatosDisponiveis.length, loadingFormatos])
+  const handleToggleConversionPanel = () => {
+    const next = !showConversionPanel
+    setShowConversionPanel(next)
+
+    if (!next || formatosDisponiveis.length > 0 || loadingFormatos) return
+
+    setLoadingFormatos(true)
+    getFormatosDisponiveis(arquivo.id)
+      .then(setFormatosDisponiveis)
+      .catch((err) => {
+        if (err instanceof ApiError) {
+          if (err.status === 404) toast.error("Arquivo não encontrado")
+          else if (err.status === 410) toast.warning("Sessão expirada")
+          else toast.error(err.message)
+        } else {
+          toast.error("Erro ao carregar formatos disponíveis")
+        }
+        console.error(err)
+      })
+      .finally(() => setLoadingFormatos(false))
+  }
 
   const handleFormatoClick = (formato: FormatoImagem) => {
     setSelectedFormato(formato)
@@ -193,7 +204,7 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
         <div className="p-3 sm:p-4">
           <div className="flex gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
-              <Icon className="h-5 w-5 text-muted-foreground" />
+              {iconElement}
             </div>
 
             <div className="min-w-0 flex-1">
@@ -201,11 +212,16 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                 <p className="min-w-0 text-sm font-medium leading-snug line-clamp-2 wrap-break-word sm:truncate sm:line-clamp-none">
                   {arquivo.nomeOriginal}
                 </p>
-                {arquivo.arquivoOriginalId && (
-                  <Badge variant="secondary" className="shrink-0 text-xs">
-                    {arquivo.formatoConvertido}
+                <div className="shrink-0 flex items-center gap-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {extensionLabel}
                   </Badge>
-                )}
+                  {isConverted && (
+                    <Badge variant="outline" className="text-xs">
+                      CONVERTIDO
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -226,7 +242,7 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                   size="icon"
                   aria-label="Converter arquivo"
                   className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-primary hover:text-primary touch-manipulation"
-                  onClick={() => setShowConversionPanel(!showConversionPanel)}
+                  onClick={handleToggleConversionPanel}
                 >
                   <Repeat className="h-5 w-5 md:h-4 md:w-4" />
                 </Button>

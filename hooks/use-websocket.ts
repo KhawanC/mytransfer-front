@@ -43,12 +43,15 @@ export function useWebSocket(autoConnect = true): UseWebSocketReturn {
             throw new Error("Sessão expirada")
           }
         }
+
+        client.connectHeaders = {
+          Authorization: `Bearer ${token}`,
+        }
       },
       webSocketFactory: () => {
         const token = getAccessToken()
         if (!token) throw new Error("Sessão expirada")
-        const wsUrl = `${WS_URL}?token=${encodeURIComponent(token)}`
-        return new WebSocket(wsUrl.replace(/^http/, "ws"))
+        return new WebSocket(WS_URL.replace(/^http/, "ws"))
       },
       connectHeaders: {},
       reconnectDelay: 3000,
