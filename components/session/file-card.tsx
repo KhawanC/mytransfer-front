@@ -64,6 +64,7 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
   const [loadingFormatos, setLoadingFormatos] = useState(false)
   const [selectedFormato, setSelectedFormato] = useState<FormatoConversao | null>(null)
   const [showConversionModal, setShowConversionModal] = useState(false)
+  const [hasConversionOptions, setHasConversionOptions] = useState(true)
   
   const iconElement = getFileIconElement(arquivo.tipoMime)
   const senderName = arquivo.nomeRemetente || (isOwner ? "Você" : "Outro usuário")
@@ -77,17 +78,30 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
     isConverted,
   })
 
-  const podeConverter = arquivo.conversivel && arquivo.status === "COMPLETO" && espacoDisponivel > 0
+  const podeConverter = arquivo.conversivel && arquivo.status === "COMPLETO" && espacoDisponivel > 0 && hasConversionOptions
 
   const handleToggleConversionPanel = () => {
     const next = !showConversionPanel
-    setShowConversionPanel(next)
 
-    if (!next || formatosDisponiveis.length > 0 || loadingFormatos) return
+    if (!next) {
+      setShowConversionPanel(false)
+      return
+    }
+
+    setShowConversionPanel(true)
+
+    if (loadingFormatos) return
 
     setLoadingFormatos(true)
     getFormatosDisponiveis(arquivo.id)
-      .then(setFormatosDisponiveis)
+      .then((formatos) => {
+        setFormatosDisponiveis(formatos)
+        const temFormatos = formatos.length > 0
+        setHasConversionOptions(temFormatos)
+        if (!temFormatos) {
+          setShowConversionPanel(false)
+        }
+      })
       .catch((err) => {
         if (err instanceof ApiError) {
           if (err.status === 404) toast.error("Arquivo não encontrado")
