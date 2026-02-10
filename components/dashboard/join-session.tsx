@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { api } from "@/lib/api"
+import { api, ApiError } from "@/lib/api"
 import type { Sessao } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,10 +42,14 @@ export function JoinSession({ onJoined }: JoinSessionProps) {
         setOpen(false)
         router.push(`/sessao/${sessao.id}`)
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Erro ao entrar na sessão"
-        if (msg.includes("404")) toast.error("Sessão não encontrada")
-        else if (msg.includes("400")) toast.error("Sessão indisponível ou você é o criador")
-        else toast.error(msg)
+        if (err instanceof ApiError) {
+          if (err.status === 404) toast.error("Sessão não encontrada")
+          else if (err.status === 400) toast.error("Sessão indisponível ou você é o criador")
+          else toast.error(err.message)
+        } else {
+          const msg = err instanceof Error ? err.message : "Erro ao entrar na sessão"
+          toast.error(msg)
+        }
       } finally {
         setIsJoining(false)
       }

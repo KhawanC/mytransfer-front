@@ -66,8 +66,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAndRefreshToken = async () => {
       const token = getAccessToken()
-      if (token && !isTokenExpired(token) && isTokenExpiringSoon(token, 300)) {
-        await refreshAccessToken()
+
+      if (!token) {
+        if (user) logout()
+        return
+      }
+
+      if (isTokenExpired(token)) {
+        const refreshed = await refreshAccessToken()
+        if (!refreshed) logout()
+        return
+      }
+
+      if (isTokenExpiringSoon(token, 300)) {
+        const refreshed = await refreshAccessToken()
+        if (!refreshed) logout()
       }
     }
 
@@ -82,7 +95,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearInterval(refreshIntervalRef.current)
       }
     }
-  }, [])
+  }, [logout, user])
+
+  useEffect(() => {
+    const handler = () => logout()
+    window.addEventListener("mt:logout", handler)
+    return () => window.removeEventListener("mt:logout", handler)
+  }, [logout])
 
   useEffect(() => {
     fetchUser()

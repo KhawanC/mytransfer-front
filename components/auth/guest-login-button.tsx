@@ -22,7 +22,13 @@ export function GuestLoginButton() {
       })
 
       if (!res.ok) {
-        throw new Error("Failed to create guest user")
+        const body = await res.json().catch(() => null)
+        const message = body && typeof body === "object" && "message" in body
+          ? String((body as { message: unknown }).message)
+          : "Erro ao entrar como convidado"
+
+        if (res.status === 429) throw new Error("Muitas tentativas, tente novamente")
+        throw new Error(message)
       }
 
       const data = await res.json()
@@ -31,7 +37,8 @@ export function GuestLoginButton() {
       router.push("/dashboard")
     } catch (error) {
       console.error("Guest login error:", error)
-      toast.error("Erro ao entrar como convidado")
+      const message = error instanceof Error ? error.message : "Erro ao entrar como convidado"
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

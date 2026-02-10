@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/providers/auth-provider"
-import { api } from "@/lib/api"
+import { api, ApiError } from "@/lib/api"
 import type { Sessao } from "@/types"
 import { ArrowLeftRight, Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -33,8 +33,15 @@ export default function TransferPage({ params }: { params: Promise<{ hash: strin
         })
         router.replace(`/sessao/${sessao.id}`)
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Não foi possível entrar na sessão"
-        toast.error(message)
+        if (err instanceof ApiError) {
+          if (err.status === 404) toast.error("Sessão não encontrada")
+          else if (err.status === 410) toast.warning("Sessão expirada")
+          else if (err.status === 400) toast.error("Sessão indisponível")
+          else toast.error(err.message)
+        } else {
+          const message = err instanceof Error ? err.message : "Não foi possível entrar na sessão"
+          toast.error(message)
+        }
         router.replace("/dashboard")
       }
     }

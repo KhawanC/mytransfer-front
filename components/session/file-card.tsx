@@ -33,7 +33,7 @@ import {
 } from "lucide-react"
 import { formatBytes, formatRelativeTime, cn } from "@/lib/utils"
 import { ConversionModal } from "./conversion-modal"
-import { getFormatosDisponiveis, converterArquivo } from "@/lib/api"
+import { ApiError, getFormatosDisponiveis, converterArquivo } from "@/lib/api"
 import { toast } from "sonner"
 
 interface FileCardProps {
@@ -77,7 +77,13 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
       getFormatosDisponiveis(arquivo.id)
         .then(setFormatosDisponiveis)
         .catch((err) => {
-          toast.error("Erro ao carregar formatos disponíveis")
+          if (err instanceof ApiError) {
+            if (err.status === 404) toast.error("Arquivo não encontrado")
+            else if (err.status === 410) toast.warning("Sessão expirada")
+            else toast.error(err.message)
+          } else {
+            toast.error("Erro ao carregar formatos disponíveis")
+          }
           console.error(err)
         })
         .finally(() => setLoadingFormatos(false))
@@ -98,7 +104,13 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
       setShowConversionPanel(false)
       setSelectedFormato(null)
     } catch (err) {
-      toast.error("Erro ao solicitar conversão")
+      if (err instanceof ApiError) {
+        if (err.status === 404) toast.error("Arquivo não encontrado")
+        else if (err.status === 410) toast.warning("Sessão expirada")
+        else toast.error(err.message)
+      } else {
+        toast.error("Erro ao solicitar conversão")
+      }
       console.error(err)
     }
   }

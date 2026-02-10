@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, use } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/providers/auth-provider"
-import { api } from "@/lib/api"
+import { api, ApiError } from "@/lib/api"
 import { useWebSocket } from "@/hooks/use-websocket"
 import { useUpload } from "@/hooks/use-upload"
 import { useUploadRecovery } from "@/hooks/use-upload-recovery"
@@ -72,8 +72,15 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         setPendingUserName(sessao.nomeUsuarioConvidadoPendente)
         setShowApprovalAlert(true)
       }
-    } catch {
-      toast.error("Sessão não encontrada")
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) return
+        if (err.status === 404) toast.error("Sessão não encontrada")
+        else if (err.status === 410) toast.warning("Sessão expirada")
+        else toast.error(err.message)
+      } else {
+        toast.error("Sessão não encontrada")
+      }
       router.replace("/dashboard")
     } finally {
       setIsLoading(false)
@@ -256,8 +263,14 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       await api(`/api/transferencia/arquivo/${arquivoId}`, { method: "DELETE" })
       setArquivos((prev) => prev.filter((a) => a.id !== arquivoId))
       toast.success("Arquivo removido")
-    } catch {
-      toast.error("Erro ao remover arquivo")
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 404) toast.error("Arquivo não encontrado")
+        else if (err.status === 410) toast.warning("Sessão expirada")
+        else toast.error(err.message)
+      } else {
+        toast.error("Erro ao remover arquivo")
+      }
     }
   }
 
@@ -307,8 +320,13 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       await api(`/api/transferencia/sessao/${session.id}`, { method: "DELETE" })
       toast.success("Sessão encerrada")
       router.replace("/dashboard")
-    } catch {
-      toast.error("Erro ao encerrar sessão")
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 410) toast.warning("Sessão expirada")
+        else toast.error(err.message)
+      } else {
+        toast.error("Erro ao encerrar sessão")
+      }
     }
   }
 
@@ -321,8 +339,13 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       })
       toast.success("Você saiu da sessão")
       router.replace("/dashboard")
-    } catch {
-      toast.error("Erro ao sair da sessão")
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 410) toast.warning("Sessão expirada")
+        else toast.error(err.message)
+      } else {
+        toast.error("Erro ao sair da sessão")
+      }
     }
   }
 

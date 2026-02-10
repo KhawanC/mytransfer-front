@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { api } from "@/lib/api"
+import { api, ApiError } from "@/lib/api"
 import type { Sessao, UserType } from "@/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,8 +41,12 @@ export function CreateSession({ onCreated, disabled, userType }: CreateSessionPr
       onCreated(sessao)
       toast.success("Sessão criada!")
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro ao criar sessão"
-      toast.error(msg.includes("409") || msg.includes("400") ? "Você já possui uma sessão ativa" : msg)
+      if (err instanceof ApiError && (err.status === 409 || err.status === 400)) {
+        toast.error("Você já possui uma sessão ativa")
+      } else {
+        const msg = err instanceof Error ? err.message : "Erro ao criar sessão"
+        toast.error(msg)
+      }
       setOpen(false)
     } finally {
       setIsCreating(false)

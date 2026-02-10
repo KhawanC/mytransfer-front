@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { OAuthButton } from "./oauth-button"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { ApiError } from "@/lib/api"
 
 const registerSchema = z
   .object({
@@ -44,8 +45,12 @@ export function RegisterForm() {
       await register(values.name, values.email, values.password)
       router.push("/dashboard")
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao criar conta"
-      toast.error(message.includes("409") ? "Email já cadastrado" : message)
+      if (err instanceof ApiError && err.status === 409) {
+        toast.error("Email já cadastrado")
+      } else {
+        const message = err instanceof Error ? err.message : "Erro ao criar conta"
+        toast.error(message)
+      }
     } finally {
       setIsLoading(false)
     }

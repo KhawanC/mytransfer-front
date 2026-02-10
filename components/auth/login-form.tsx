@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { OAuthButton } from "./oauth-button"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { ApiError } from "@/lib/api"
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -37,8 +38,12 @@ export function LoginForm() {
       await login(values.email, values.password)
       router.push("/dashboard")
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login"
-      toast.error(message.includes("401") ? "Email ou senha inválidos" : message)
+      if (err instanceof ApiError && err.status === 401) {
+        toast.error("Email ou senha inválidos")
+      } else {
+        const message = err instanceof Error ? err.message : "Erro ao fazer login"
+        toast.error(message)
+      }
     } finally {
       setIsLoading(false)
     }

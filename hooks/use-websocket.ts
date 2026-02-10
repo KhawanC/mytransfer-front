@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useCallback, useState } from "react"
 import { Client } from "@stomp/stompjs"
-import { getAccessToken } from "@/lib/auth"
+import { clearTokens, getAccessToken, isTokenExpired } from "@/lib/auth"
+import { refreshAccessToken } from "@/lib/api"
 import { WS_URL } from "@/lib/constants"
 
 interface UseWebSocketReturn {
@@ -20,13 +21,35 @@ export function useWebSocket(autoConnect = true): UseWebSocketReturn {
   const connect = useCallback(() => {
     if (clientRef.current?.connected) return
 
-    const token = getAccessToken()
-    if (!token) return
-
-    const wsUrl = `${WS_URL}?token=${encodeURIComponent(token)}`
+    const dispatchLogout = () => {
+      if (typeof window === "undefined") return
+      window.dispatchEvent(new Event("mt:logout"))
+    }
 
     const client = new Client({
-      brokerURL: wsUrl.replace(/^http/, "ws"),
+      beforeConnect: async () => {
+        let token = getAccessToken()
+        if (!token) {
+          clearTokens()
+          dispatchLogout()
+          throw new Error("Sessão expirada")
+        }
+
+        if (isTokenExpired(token)) {
+          token = await refreshAccessToken()
+          if (!token) {
+            clearTokens()
+            dispatchLogout()
+            throw new Error("Sessão expirada")
+          }
+        }
+      },
+      webSocketFactory: () => {
+        const token = getAccessToken()
+        if (!token) throw new Error("Sessão expirada")
+        const wsUrl = `${WS_URL}?token=${encodeURIComponent(token)}`
+        return new WebSocket(wsUrl.replace(/^http/, "ws"))
+      },
       connectHeaders: {},
       reconnectDelay: 3000,
       heartbeatIncoming: 10000,
@@ -40,6 +63,14 @@ export function useWebSocket(autoConnect = true): UseWebSocketReturn {
       onStompError: (frame) => {
         console.error("STOMP error:", frame.headers["message"])
         setIsConnected(false)
+      },
+      onWebSocketClose: () => {
+        setIsConnected(false)
+        const token = getAccessToken()
+        if (!token || isTokenExpired(token)) {
+          clearTokens()
+          dispatchLogout()
+        }
       },
     })
 

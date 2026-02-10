@@ -2,13 +2,55 @@ import { API_URL } from "./constants"
 import { getAccessToken, getRefreshToken, setTokens, clearTokens, isTokenExpired } from "./auth"
 import type { AuthResponse } from "@/types"
 
+function dispatchLogoutEvent(): void {
+  if (typeof window === "undefined") return
+  window.dispatchEvent(new Event("mt:logout"))
+}
+
+function logoutAndRedirectToLogin(): void {
+  clearTokens()
+  dispatchLogoutEvent()
+  if (typeof window !== "undefined") {
+    window.location.href = "/login"
+  }
+}
+
+async function readErrorBody(res: Response): Promise<unknown> {
+  const contentType = res.headers.get("content-type") ?? ""
+
+  if (contentType.includes("application/json")) {
+    return res.json().catch(() => null)
+  }
+
+  const text = await res.text().catch(() => "")
+  return text || null
+}
+
+function extractErrorMessage(status: number, statusText: string, body: unknown): string {
+  if (body && typeof body === "object") {
+    const maybeMessage = (body as { message?: unknown }).message
+    if (typeof maybeMessage === "string" && maybeMessage.trim().length > 0) return maybeMessage
+
+    const maybeError = (body as { error?: unknown }).error
+    if (typeof maybeError === "string" && maybeError.trim().length > 0) return maybeError
+  }
+
+  if (typeof body === "string" && body.trim().length > 0) return body
+
+  if (status === 0) return "Não foi possível conectar ao servidor"
+  if (status === 401) return "Sessão expirada"
+
+  const fallback = `${status} ${statusText}`.trim()
+  return fallback.length > 0 ? fallback : "Erro inesperado"
+}
+
 class ApiError extends Error {
   constructor(
     public status: number,
     public statusText: string,
     public body?: unknown,
   ) {
-    super(`${status} ${statusText}`)
+    super(extractErrorMessage(status, statusText, body))
     this.name = "ApiError"
   }
 }
@@ -17,6 +59,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = getRefreshToken()
   if (!refreshToken || isTokenExpired(refreshToken)) {
     clearTokens()
+    dispatchLogoutEvent()
     return null
   }
 
@@ -29,6 +72,7 @@ export async function refreshAccessToken(): Promise<string | null> {
 
     if (!res.ok) {
       clearTokens()
+      dispatchLogoutEvent()
       return null
     }
 
@@ -37,6 +81,7 @@ export async function refreshAccessToken(): Promise<string | null> {
     return data.accessToken
   } catch {
     clearTokens()
+    dispatchLogoutEvent()
     return null
   }
 }
@@ -50,9 +95,7 @@ export async function api<T = unknown>(
   if (accessToken && isTokenExpired(accessToken)) {
     accessToken = await refreshAccessToken()
     if (!accessToken) {
-      if (typeof window !== "undefined") {
-        window.location.href = "/login"
-      }
+      logoutAndRedirectToLogin()
       throw new ApiError(401, "Session expired")
     }
   }
@@ -66,23 +109,33 @@ export async function api<T = unknown>(
     headers["Authorization"] = `Bearer ${accessToken}`
   }
 
-  let res = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  })
+  let res: Response
+
+  try {
+    res = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers,
+    })
+  } catch (err) {
+    const rawMessage = err instanceof Error ? err.message : String(err)
+    throw new ApiError(0, "Network Error", { message: rawMessage })
+  }
 
   if (res.status === 401 && accessToken) {
     const newToken = await refreshAccessToken()
     if (newToken) {
       headers["Authorization"] = `Bearer ${newToken}`
-      res = await fetch(`${API_URL}${endpoint}`, {
-        ...options,
-        headers,
-      })
-    } else {
-      if (typeof window !== "undefined") {
-        window.location.href = "/login"
+      try {
+        res = await fetch(`${API_URL}${endpoint}`, {
+          ...options,
+          headers,
+        })
+      } catch (err) {
+        const rawMessage = err instanceof Error ? err.message : String(err)
+        throw new ApiError(0, "Network Error", { message: rawMessage })
       }
+    } else {
+      logoutAndRedirectToLogin()
       throw new ApiError(401, "Session expired")
     }
   }
@@ -90,7 +143,12 @@ export async function api<T = unknown>(
   if (res.status === 204) return undefined as T
 
   if (!res.ok) {
-    const body = await res.json().catch(() => null)
+    const body = await readErrorBody(res)
+
+    if (res.status === 401) {
+      logoutAndRedirectToLogin()
+    }
+
     throw new ApiError(res.status, res.statusText, body)
   }
 

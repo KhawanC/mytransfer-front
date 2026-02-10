@@ -21,7 +21,7 @@ import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { ArrowRight, FileStack, Users, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { deleteSession } from "@/lib/api"
+import { ApiError, deleteSession } from "@/lib/api"
 
 interface SessionCardProps {
   session: Sessao
@@ -54,7 +54,12 @@ export function SessionCard({ session, currentUserId, onDeleted }: SessionCardPr
       toast.success("Sessão encerrada com sucesso")
       onDeleted?.()
     } catch (error) {
-      toast.error("Erro ao encerrar sessão")
+      if (error instanceof ApiError) {
+        if (error.status === 410) toast.warning("Sessão expirada")
+        else toast.error(error.message)
+      } else {
+        toast.error("Erro ao encerrar sessão")
+      }
       console.error(error)
     } finally {
       setIsDeleting(false)
