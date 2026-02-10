@@ -167,144 +167,147 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
     }
   })()
 
+  const hasActions =
+    podeConverter ||
+    arquivo.status === "COMPLETO" ||
+    (onCancel && isOwner && (arquivo.status === "ENVIANDO" || arquivo.status === "PENDENTE")) ||
+    canDelete
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
-        {/* Main file info */}
-        <div className="flex items-center gap-3 py-3 px-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
-            <Icon className="h-5 w-5 text-muted-foreground" />
+        <div className="p-3 sm:p-4">
+          <div className="flex gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
+              <Icon className="h-5 w-5 text-muted-foreground" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start gap-2">
+                <p className="min-w-0 text-sm font-medium leading-snug line-clamp-2 wrap-break-word sm:truncate sm:line-clamp-none">
+                  {arquivo.nomeOriginal}
+                </p>
+                {arquivo.arquivoOriginalId && (
+                  <Badge variant="secondary" className="shrink-0 text-xs">
+                    {arquivo.formatoConvertido}
+                  </Badge>
+                )}
+              </div>
+
+              <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span className="truncate">{formatBytes(arquivo.tamanhoBytes)}</span>
+                <span className="truncate text-right">{timeAgo}</span>
+                <span className="truncate col-span-2">{senderName}</span>
+              </div>
+
+              <div className="mt-2">{statusElement}</div>
+            </div>
           </div>
 
-          <div className="flex-1 min-w-0 space-y-1">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium truncate">{arquivo.nomeOriginal}</p>
-              {arquivo.arquivoOriginalId && (
-                <Badge variant="secondary" className="text-xs">
-                  {arquivo.formatoConvertido}
-                </Badge>
+          {hasActions && (
+            <div className="mt-3 flex items-center justify-end gap-1">
+              {podeConverter && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Converter arquivo"
+                  className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-primary hover:text-primary touch-manipulation"
+                  onClick={() => setShowConversionPanel(!showConversionPanel)}
+                >
+                  <Repeat className="h-5 w-5 md:h-4 md:w-4" />
+                </Button>
+              )}
+
+              {arquivo.status === "COMPLETO" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Baixar arquivo"
+                  className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-primary hover:text-primary touch-manipulation"
+                  onClick={() => onDownload(arquivo.id)}
+                >
+                  <Download className="h-5 w-5 md:h-4 md:w-4" />
+                </Button>
+              )}
+
+              {onCancel && isOwner && (arquivo.status === "ENVIANDO" || arquivo.status === "PENDENTE") && (
+                <Dialog open={showCancel} onOpenChange={setShowCancel}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Cancelar upload"
+                      className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-muted-foreground hover:text-destructive touch-manipulation"
+                    >
+                      <X className="h-5 w-5 md:h-4 md:w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-xs">
+                    <DialogHeader>
+                      <DialogTitle>Cancelar upload?</DialogTitle>
+                      <DialogDescription>
+                        O envio de {arquivo.nomeOriginal} será interrompido.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        className="w-full cursor-pointer"
+                        onClick={() => setShowCancel(false)}
+                      >
+                        Voltar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="w-full cursor-pointer"
+                        onClick={() => {
+                          onCancel(arquivo.id)
+                          setShowCancel(false)
+                        }}
+                      >
+                        Cancelar Upload
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+
+              {canDelete && (
+                <Dialog open={showDelete} onOpenChange={setShowDelete}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Excluir arquivo"
+                      className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-muted-foreground hover:text-destructive touch-manipulation"
+                    >
+                      <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-xs">
+                    <DialogHeader>
+                      <DialogTitle>Excluir arquivo?</DialogTitle>
+                      <DialogDescription>
+                        {arquivo.nomeOriginal} será removido permanentemente.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="destructive"
+                        className="w-full cursor-pointer"
+                        onClick={() => {
+                          onDelete(arquivo.id)
+                          setShowDelete(false)
+                        }}
+                      >
+                        Excluir
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               )}
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted-foreground">
-                {formatBytes(arquivo.tamanhoBytes)}
-              </span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">
-                {senderName}
-              </span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">
-                {timeAgo}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              {statusElement}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 shrink-0">
-            {/* Conversion button */}
-            {podeConverter && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-primary hover:text-primary touch-manipulation"
-                onClick={() => setShowConversionPanel(!showConversionPanel)}
-              >
-                <Repeat className="h-5 w-5 md:h-4 md:w-4" />
-              </Button>
-            )}
-
-            {/* Download */}
-            {arquivo.status === "COMPLETO" && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-primary hover:text-primary touch-manipulation"
-                onClick={() => onDownload(arquivo.id)}
-              >
-                <Download className="h-5 w-5 md:h-4 md:w-4" />
-              </Button>
-            )}
-
-            {/* Cancel button */}
-            {onCancel && isOwner && (arquivo.status === "ENVIANDO" || arquivo.status === "PENDENTE") && (
-              <Dialog open={showCancel} onOpenChange={setShowCancel}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-muted-foreground hover:text-destructive touch-manipulation"
-                  >
-                    <X className="h-5 w-5 md:h-4 md:w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-xs">
-                  <DialogHeader>
-                    <DialogTitle>Cancelar upload?</DialogTitle>
-                    <DialogDescription>
-                      O envio de {arquivo.nomeOriginal} será interrompido.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      className="w-full cursor-pointer"
-                      onClick={() => setShowCancel(false)}
-                    >
-                      Voltar
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="w-full cursor-pointer"
-                      onClick={() => {
-                        onCancel(arquivo.id)
-                        setShowCancel(false)
-                      }}
-                    >
-                      Cancelar Upload
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
-
-            {/*Delete button */}
-            {canDelete && (
-              <Dialog open={showDelete} onOpenChange={setShowDelete}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 md:h-8 md:w-8 cursor-pointer text-muted-foreground hover:text-destructive touch-manipulation"
-                  >
-                    <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-xs">
-                  <DialogHeader>
-                    <DialogTitle>Excluir arquivo?</DialogTitle>
-                    <DialogDescription>
-                      {arquivo.nomeOriginal} será removido permanentemente.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button
-                      variant="destructive"
-                      className="w-full cursor-pointer"
-                      onClick={() => {
-                        onDelete(arquivo.id)
-                        setShowDelete(false)
-                      }}
-                    >
-                      Excluir
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Conversion panel */}
