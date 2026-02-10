@@ -281,13 +281,6 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
                     </DialogHeader>
                     <DialogFooter>
                       <Button
-                        variant="outline"
-                        className="w-full cursor-pointer"
-                        onClick={() => setShowCancel(false)}
-                      >
-                        Voltar
-                      </Button>
-                      <Button
                         variant="destructive"
                         className="w-full cursor-pointer"
                         onClick={() => {
