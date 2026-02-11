@@ -238,7 +238,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className={`text-base font-bold ${
                         isFeatured
-                          ? "bg-linear-to-r from-slate-700 via-zinc-600 to-slate-700 bg-clip-text text-transparent"
+                          ? "text-amber-200"
                           : "text-foreground"
                       }`}>
                         {plan.nome}
