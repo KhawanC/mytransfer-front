@@ -105,7 +105,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
 
   const handleDotClick = useCallback((index: number) => {
     if (!sliderRef.current) return
-    const child = sliderRef.current.children.item(index)
+    const child = sliderRef.current.children.item(index) as HTMLElement | null
     if (!child) return
     sliderRef.current.scrollTo({ left: child.offsetLeft, behavior: "smooth" })
   }, [])
@@ -114,7 +114,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
     if (!sliderRef.current) return
     const slider = sliderRef.current
     const onScroll = () => {
-      const children = Array.from(slider.children)
+      const children = Array.from(slider.children) as HTMLElement[]
       if (children.length === 0) return
       const sliderLeft = slider.scrollLeft
       const closestIndex = children.reduce((closest, child, index) => {
