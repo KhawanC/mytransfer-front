@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import Waves from "@/components/react-bits/waves"
 import {
   Dialog,
   DialogContent,
@@ -205,8 +206,21 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
                 >
                   {isFeatured && (
                     <>
-                      <div className="absolute inset-0 rounded-xl animate-platinum-wave overflow-hidden">
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-slate-200/20 to-transparent -translate-x-full animate-wave-slide" />
+                      <div className="absolute inset-0 rounded-xl overflow-hidden">
+                        <Waves
+                          className="pointer-events-none opacity-70"
+                          lineColor="rgba(226, 232, 240, 0.35)"
+                          backgroundColor="transparent"
+                          waveSpeedX={0.015}
+                          waveSpeedY={0.006}
+                          waveAmpX={28}
+                          waveAmpY={14}
+                          xGap={12}
+                          yGap={28}
+                          friction={0.9}
+                          tension={0.008}
+                          maxCursorMove={80}
+                        />
                       </div>
                       <div className="absolute -inset-px rounded-xl bg-linear-to-r from-slate-300/40 via-zinc-200/30 to-slate-300/40 opacity-60 blur-[2px]" />
                       <div className="absolute top-2 right-2">

@@ -151,35 +151,6 @@
   }
 }
 
-@keyframes wave-slide {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(200%);
-  }
-}
-
-@keyframes platinum-wave {
-  0%, 100% {
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      rgba(148, 163, 184, 0.08) 25%, 
-      rgba(203, 213, 225, 0.12) 50%, 
-      rgba(148, 163, 184, 0.08) 75%, 
-      transparent 100%
-    );
-  }
-  50% {
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      rgba(203, 213, 225, 0.12) 25%, 
-      rgba(226, 232, 240, 0.15) 50%, 
-      rgba(203, 213, 225, 0.12) 75%, 
-      transparent 100%
-    );
-  }
-}
 
 .animate-glow-pulse {
   animation: glow-pulse 3s ease-in-out infinite;
@@ -187,12 +158,4 @@
 
 .animate-border-glow {
   animation: border-glow 2s ease-in-out infinite;
-}
-
-.animate-wave-slide {
-  animation: wave-slide 3s linear infinite;
-}
-
-.animate-platinum-wave {
-  animation: platinum-wave 4s ease-in-out infinite;
 }
