@@ -89,7 +89,10 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" className="w-full h-11 gap-2 cursor-pointer">
+        <Button
+          variant="secondary"
+          className="w-full h-11 gap-2 cursor-pointer border border-amber-300/60 bg-gradient-to-r from-amber-300/25 via-yellow-200/15 to-amber-200/25 text-amber-50 shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_10px_24px_rgba(251,191,36,0.22)] transition hover:border-amber-300/90 hover:shadow-[0_0_0_1px_rgba(251,191,36,0.6),0_14px_34px_rgba(251,191,36,0.35)]"
+        >
           <Crown className="h-4 w-4" />
           Aumentar limites
         </Button>
