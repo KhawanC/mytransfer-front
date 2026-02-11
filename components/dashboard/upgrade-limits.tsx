@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { Check, ChevronLeft, ChevronRight, Crown, Sparkles, Zap, Users, Clock, FileStack, Upload } from "lucide-react"
 import { toast } from "sonner"
+import { GuestUpgradePrompt } from "@/components/dashboard/guest-upgrade-prompt"
 
 const benefits = [
   { icon: Zap, text: "Sessoes simultaneas ilimitadas", color: "text-amber-400" },
@@ -49,7 +50,8 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
   const sliderRef = useRef<HTMLDivElement | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const canUpgrade = user?.userType === "FREE"
+  const canUpgrade = user?.userType === "FREE" || user?.userType === "GUEST"
+  const isGuest = user?.userType === "GUEST"
 
   const planLabel = useMemo(() => {
     if (plans.length === 0) return ""
@@ -75,10 +77,10 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
   }, [])
 
   useEffect(() => {
-    if (open && plans.length === 0) {
+    if (open && plans.length === 0 && !isGuest) {
       fetchPlans()
     }
-  }, [open, plans.length, fetchPlans])
+  }, [open, plans.length, fetchPlans, isGuest])
 
   const handleCheckout = useCallback(async (planId: string) => {
     setActivePlanId(planId)
@@ -155,7 +157,11 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
           </div>
         </DialogHeader>
 
-        <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
+        {isGuest ? (
+          <GuestUpgradePrompt onClose={() => setOpen(false)} />
+        ) : (
+          <>
+          <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-400" />
@@ -330,6 +336,8 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
             })}
           </ul>
         </div>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   )
