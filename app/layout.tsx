@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/providers/auth-provider"
+import { ConnectivityIndicator } from "@/components/ui/connectivity-indicator"
+import { InstallPrompt } from "@/components/ui/install-prompt"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -19,6 +21,13 @@ export const metadata: Metadata = {
   description: "Transfira arquivos grandes entre dispositivos de forma rápida, segura e sem limites. Compartilhe fotos, vídeos e documentos com seus amigos em tempo real.",
   keywords: ["transferência de arquivos", "compartilhar arquivos", "enviar arquivos grandes", "compartilhamento p2p", "transferência segura"],
   authors: [{ name: "MePassa" }],
+  manifest: "/manifest.json",
+  themeColor: "#7c3aed",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MePassa",
+  },
   openGraph: {
     title: "MePassa - Transferência de Arquivos Rápida e Segura",
     description: "Transfira arquivos grandes entre dispositivos de forma rápida, segura e sem limites.",
@@ -45,10 +54,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-dvh`}>
         <AuthProvider>
           {children}
           <Toaster richColors position="top-right" />
+          <ConnectivityIndicator />
+          <InstallPrompt />
         </AuthProvider>
       </body>
     </html>
