@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/providers/auth-provider"
-import { cancelSubscription, deleteAccount, getSubscriptionStatus } from "@/lib/api"
+import { deleteAccount, getSubscriptionStatus } from "@/lib/api"
 import type { AssinaturaStatus } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -37,34 +37,14 @@ export function AccountSettings({ open, onOpenChange }: AccountSettingsProps) {
   const { logout } = useAuth()
   const router = useRouter()
   const [status, setStatus] = useState<AssinaturaStatus | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isCanceling, setIsCanceling] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (!open) return
-    setIsLoading(true)
     getSubscriptionStatus()
       .then((data) => setStatus(data))
       .catch(() => setStatus(null))
-      .finally(() => setIsLoading(false))
   }, [open])
-
-  const canCancel = status?.status === "ATIVA" && !status?.cancelarAoFinalPeriodo
-
-  async function handleCancel() {
-    setIsCanceling(true)
-    try {
-      const data = await cancelSubscription()
-      setStatus(data)
-      toast.success("Cancelamento solicitado")
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao cancelar assinatura"
-      toast.error(message)
-    } finally {
-      setIsCanceling(false)
-    }
-  }
 
   async function handleDeleteAccount() {
     setIsDeleting(true)
@@ -86,7 +66,7 @@ export function AccountSettings({ open, onOpenChange }: AccountSettingsProps) {
         <DialogHeader>
           <DialogTitle>Configuracoes da conta</DialogTitle>
           <DialogDescription>
-            Gerencie sua assinatura e dados pessoais.
+            Gerencie seu premium e dados pessoais.
           </DialogDescription>
         </DialogHeader>
 
@@ -108,14 +88,9 @@ export function AccountSettings({ open, onOpenChange }: AccountSettingsProps) {
                 Vencimento: {new Date(status.periodoFim).toLocaleDateString("pt-BR")}
               </p>
             )}
-            <Button
-              variant="outline"
-              className="w-full cursor-pointer"
-              onClick={handleCancel}
-              disabled={!canCancel || isCanceling || isLoading}
-            >
-              {isCanceling ? "Cancelando..." : "Cancelar assinatura"}
-            </Button>
+            <p className="text-xs text-muted-foreground">
+              O acesso premium expira automaticamente ao final do periodo contratado.
+            </p>
           </div>
 
           <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 space-y-3">

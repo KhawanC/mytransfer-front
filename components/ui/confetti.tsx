@@ -9,10 +9,10 @@ interface ConfettiProps {
 export function Confetti({ active }: ConfettiProps) {
   const pieces = useMemo(
     () =>
-      Array.from({ length: 28 }, (_, index) => {
+      Array.from({ length: 64 }, (_, index) => {
         const left = Math.random() * 100
-        const delay = Math.random() * 0.6
-        const duration = 2.4 + Math.random() * 0.8
+        const delay = Math.random() * 1.2
+        const duration = 4.5 + Math.random() * 1.5
         const rotate = Math.random() * 360
         const colors = [
           "#f97316",

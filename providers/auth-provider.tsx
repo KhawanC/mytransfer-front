@@ -12,6 +12,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
   loginWithTokens: (accessToken: string, refreshToken: string) => void
+  refreshUser: () => Promise<void>
   logout: () => void
 }
 
@@ -145,6 +146,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    await fetchUser()
+  }, [fetchUser])
+
   return (
     <AuthContext.Provider
       value={{
@@ -154,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         loginWithTokens,
+        refreshUser,
         logout,
       }}
     >

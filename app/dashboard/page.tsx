@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
   const router = useRouter()
   const [sessions, setSessions] = useState<Sessao[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -58,7 +58,8 @@ export default function DashboardPage() {
           setShowSuccess(true)
           setShowConfetti(true)
           markSubscriptionCelebration()
-          setTimeout(() => setShowConfetti(false), 2600)
+          refreshUser()
+          setTimeout(() => setShowConfetti(false), 5200)
         }
 
         const hasQrInfo = !!status.brCode || !!status.qrCodeImageUrl
@@ -98,14 +99,15 @@ export default function DashboardPage() {
         setShowSuccess(true)
         setShowConfetti(true)
         markSubscriptionCelebration()
-        setTimeout(() => setShowConfetti(false), 2600)
+        refreshUser()
+        setTimeout(() => setShowConfetti(false), 5200)
       }
     })
 
     return () => {
       unsubNotif()
     }
-  }, [isConnected, user, subscribe, router])
+  }, [isConnected, user, subscribe, router, refreshUser])
 
   const handleSessionCreated = useCallback(async (sessao: Sessao) => {
     setSessions((prev) => [sessao, ...prev])

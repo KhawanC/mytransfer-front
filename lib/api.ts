@@ -247,10 +247,6 @@ export async function getSubscriptionStatus(): Promise<import("@/types").Assinat
   return api("/api/assinaturas/status")
 }
 
-export async function cancelSubscription(): Promise<import("@/types").AssinaturaStatus> {
-  return api("/api/assinaturas/cancelar", { method: "POST" })
-}
-
 export async function markSubscriptionCelebration(): Promise<import("@/types").AssinaturaStatus> {
   return api("/api/assinaturas/celebration", { method: "POST" })
 }

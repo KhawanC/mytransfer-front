@@ -176,7 +176,6 @@ export interface AssinaturaStatus {
   qrCodeImageUrl?: string
   paymentLinkUrl?: string
   pagamentoExpiraEm?: string
-  cancelarAoFinalPeriodo?: boolean
   celebracaoExibida?: boolean
 }
 
