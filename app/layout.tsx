@@ -1,9 +1,10 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/providers/auth-provider"
 import { ConnectivityIndicator } from "@/components/ui/connectivity-indicator"
 import { InstallPrompt } from "@/components/ui/install-prompt"
+import { ServiceWorkerRegister } from "@/app/sw-register"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -22,7 +23,6 @@ export const metadata: Metadata = {
   keywords: ["transferência de arquivos", "compartilhar arquivos", "enviar arquivos grandes", "compartilhamento p2p", "transferência segura"],
   authors: [{ name: "MePassa" }],
   manifest: "/manifest.json",
-  themeColor: "#7c3aed",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -39,12 +39,14 @@ export const metadata: Metadata = {
     title: "MePassa - Transferência de Arquivos",
     description: "Transfira arquivos grandes de forma rápida e segura",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#7c3aed",
 }
 
 export default function RootLayout({
@@ -59,6 +61,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-dvh`}>
+        <ServiceWorkerRegister />
         <AuthProvider>
           {children}
           <Toaster richColors position="top-right" />

@@ -47,7 +47,14 @@ next-pwa (@ducanh2912/next-pwa)
 
 ## ⚙️ Configuração Implementada
 
-### 1. Dependências Instaladas
+### 1. Abordagem: Service Worker Manual
+
+**Por que não usamos next-pwa?**
+- Next.js 16 usa Turbopack por padrão
+- @ducanh2912/next-pwa não é compatível com Turbopack
+- Implementação manual oferece controle total e funciona perfeitamente
+
+### 2. Service Worker (Manual)
 
 ```json
 {
@@ -57,46 +64,47 @@ next-pwa (@ducanh2912/next-pwa)
 }
 ```
 
-### 2. next.config.ts
+### 4. next.config.ts
 
 ```typescript
-import withPWA from "@ducanh2912/next-pwa";
+import type { NextConfig } from "next";
 
-export default withPWA({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
-  skipWaiting: true,
-  // ... estratégias de cache
-})(nextConfig);
+const nextConfig: NextConfig = {
+  output: "standalone",
+  reactStrictMode: process.env.NODE_ENV === 'development',
+};
+
+export default nextConfig;
 ```
 
-**Configurações importantes:**
-- `disable: development` - PWA desabilitado em dev (evita conflitos com HMR)
-- `skipWaiting: true` - Atualiza SW imediatamente em novos deploys
-- `fallbacks.document: "/offline"` - Página customizada quando offline
+**Configuração simples:**
+- Sem plugins PWA (SW manual em `public/sw.js`)
+- Output standalone para Docker
+- Turbopack habilitado por padrão (Next.js 16)
 
-### 3. Arquivos Criados
+### 5. Arquivos Criados
 
 ```
 frontend/
 ├── public/
 │   ├── manifest.json          # Manifesto PWA
+│   ├── sw.js                  # Service Worker manual
 │   └── icons/                 # Ícones PWA (a serem gerados)
 │       ├── icon-192x192.png
 │       ├── icon-512x512.png
 │       ├── icon-maskable-*.png
 │       └── apple-touch-icon.png
+├── proxy.ts                   # Headers de segurança PWA
 ├── app/
-│   ├── layout.tsx             # Atualizado com metadados PWA
+│   ├── layout.tsx             # Atualizado com metadados PWA + SW register
+│   ├── sw-register.tsx        # Componente para registrar SW
 │   └── offline/
 │       └── page.tsx           # Página de fallback offline
 ├── components/ui/
 │   ├── connectivity-indicator.tsx  # Badge online/offline
 │   └── install-prompt.tsx          # Prompt de instalação
-├── hooks/
-│   └── use-online-status.ts       # Hook de conectividade
-└── middleware.ts              # Headers de segurança
+└── hooks/
+    └── use-online-status.ts       # Hook de conectividade
 ```
 
 ---
@@ -408,7 +416,7 @@ Opções:
 
 #### 2. Headers de Segurança
 
-O middleware já configura headers essenciais. Para deploy em Nginx/Apache:
+O proxy.ts já configura headers essenciais. Para deploy em Nginx/Apache:
 
 **Nginx:**
 ```nginx
