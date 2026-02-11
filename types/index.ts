@@ -4,7 +4,9 @@ export type FormatoImagem = 'JPEG' | 'JPG' | 'PNG' | 'BMP' | 'WEBP' | 'SVG' | 'T
 
 export type FormatoVideo = 'MP4' | 'MKV' | 'WEBM' | 'MOV' | 'AVI' | 'FLV' | '3GP' | 'MPEG' | 'GIF'
 
-export type FormatoConversao = FormatoImagem | FormatoVideo
+export type FormatoAudio = 'MP3' | 'WAV' | 'AAC' | 'M4A' | 'OGG' | 'OPUS' | 'FLAC' | 'ALAC' | 'WMA' | 'AMR' | 'AIFF' | 'AIF' | 'AU' | 'SND' | 'WEBM'
+
+export type FormatoConversao = FormatoImagem | FormatoVideo | FormatoAudio
 
 export type NivelOtimizacao = 25 | 50 | 75
 

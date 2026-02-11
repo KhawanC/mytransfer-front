@@ -73,6 +73,7 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
   const [selectedNivel, setSelectedNivel] = useState<NivelOtimizacao | null>(null)
   const [showOptimizationModal, setShowOptimizationModal] = useState(false)
   const [hasOptimizationOptions, setHasOptimizationOptions] = useState(true)
+  const [showAllAudioFormats, setShowAllAudioFormats] = useState(false)
   
   const iconElement = getFileIconElement(arquivo.tipoMime)
   const senderName = arquivo.nomeRemetente || (isOwner ? "Você" : "Outro usuário")
@@ -481,21 +482,62 @@ export function FileCard({ arquivo, isOwner, onDownload, onDelete, onCancel, can
               <p className="text-sm text-muted-foreground text-center py-4">
                 Nenhum formato disponível
               </p>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {formatosDisponiveis.map((formato) => (
-                  <Badge
-                    key={formato}
-                    variant="outline"
-                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors justify-center py-2 text-sm"
-                    onClick={() => handleFormatoClick(formato)}
-                  >
-                    <FileType className="h-3 w-3 mr-1" />
-                    {formato}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            ) : (() => {
+              const isAudio = arquivo.tipoMime.startsWith("audio/")
+              const primaryAudioFormats: FormatoConversao[] = ['MP3', 'WAV', 'AAC', 'M4A', 'OGG', 'FLAC', 'OPUS', 'WEBM']
+              
+              if (isAudio && formatosDisponiveis.length > 8) {
+                const primary = formatosDisponiveis.filter(f => primaryAudioFormats.includes(f))
+                const additional = formatosDisponiveis.filter(f => !primaryAudioFormats.includes(f))
+                const visibleFormats = showAllAudioFormats ? formatosDisponiveis : primary
+                
+                return (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {visibleFormats.map((formato) => (
+                        <Badge
+                          key={formato}
+                          variant="outline"
+                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors justify-center py-2 text-sm"
+                          onClick={() => handleFormatoClick(formato)}
+                        >
+                          <FileType className="h-3 w-3 mr-1" />
+                          {formato}
+                        </Badge>
+                      ))}
+                    </div>
+                    {additional.length > 0 && (
+                      <div className="flex justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAllAudioFormats(!showAllAudioFormats)}
+                          className="h-8 text-xs cursor-pointer"
+                        >
+                          {showAllAudioFormats ? 'Mostrar menos' : `Mostrar mais (${additional.length})`}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+              
+              return (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {formatosDisponiveis.map((formato) => (
+                    <Badge
+                      key={formato}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors justify-center py-2 text-sm"
+                      onClick={() => handleFormatoClick(formato)}
+                    >
+                      <FileType className="h-3 w-3 mr-1" />
+                      {formato}
+                    </Badge>
+                  ))}
+                </div>
+              )
+            })()}
           </div>
         </div>
 
