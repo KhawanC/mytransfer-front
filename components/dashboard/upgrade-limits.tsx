@@ -58,11 +58,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
 
   const featuredPlanId = useMemo(() => {
     if (plans.length === 0) return null
-    return plans.reduce((best, plan) => {
-      const bestScore = best.precoCentavos / Math.max(best.duracaoDias, 1)
-      const nextScore = plan.precoCentavos / Math.max(plan.duracaoDias, 1)
-      return nextScore < bestScore ? plan : best
-    }, plans[0]).id
+    return plans.find((plan) => plan.recomendado)?.id ?? null
   }, [plans])
 
   const fetchPlans = useCallback(async () => {

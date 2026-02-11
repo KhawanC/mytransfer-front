@@ -154,6 +154,7 @@ export interface PlanoAssinatura {
   nome: string
   precoCentavos: number
   duracaoDias: number
+  recomendado: boolean
 }
 
 export interface CheckoutResponse {
