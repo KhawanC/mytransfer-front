@@ -141,28 +141,28 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
           Aumentar limites
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-amber-400 via-yellow-400 to-amber-500 shadow-[0_0_20px_rgba(251,191,36,0.4)]">
-              <Crown className="h-6 w-6 text-white" />
+      <DialogContent className="max-w-4xl">
+        <DialogHeader className="pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-amber-400 via-yellow-400 to-amber-500 shadow-[0_0_20px_rgba(251,191,36,0.4)]">
+              <Crown className="h-5 w-5 text-white" />
             </div>
             <div>
-              <DialogTitle className="text-2xl bg-linear-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
+              <DialogTitle className="text-xl bg-linear-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
                 Plano Premium
               </DialogTitle>
-              <DialogDescription className="text-base">
+              <DialogDescription className="text-sm">
                 Desbloqueie todo o potencial do MyTransfer
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-semibold bg-linear-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Escolha seu plano</span>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-xs font-semibold bg-linear-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Escolha seu plano</span>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -190,26 +190,29 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
 
           <div
             ref={sliderRef}
-            className="flex gap-4 overflow-x-auto pb-3 pr-2 snap-x snap-mandatory scroll-smooth [-webkit-overflow-scrolling:touch] scrollbar-hide"
+            className="flex gap-3 overflow-x-auto pb-2 pr-2 snap-x snap-mandatory scroll-smooth [-webkit-overflow-scrolling:touch] scrollbar-hide"
           >
             {plans.map((plan) => {
               const isFeatured = featuredPlanId === plan.id
               return (
                 <Card
                   key={plan.id}
-                  className={`min-w-62.5 md:min-w-70 snap-start relative transition-all duration-300 ${
+                  className={`min-w-60 md:min-w-64 snap-start relative transition-all duration-300 overflow-hidden ${
                     isFeatured
-                      ? "border-2 border-transparent bg-linear-to-br from-amber-500/20 via-yellow-400/10 to-amber-400/20 shadow-[0_0_30px_rgba(251,191,36,0.3),0_0_60px_rgba(251,191,36,0.15)] animate-glow-pulse"
+                      ? "border-2 border-slate-300/30 bg-linear-to-br from-slate-100/10 via-zinc-50/5 to-slate-100/10 shadow-[0_8px_32px_rgba(148,163,184,0.25),0_0_0_1px_rgba(148,163,184,0.1)] backdrop-blur-sm"
                       : "border border-border/60 bg-linear-to-b from-background to-muted/30 hover:border-border hover:shadow-lg"
                   }`}
                 >
                   {isFeatured && (
                     <>
-                      <div className="absolute -inset-px rounded-xl bg-linear-to-r from-amber-400 via-yellow-300 to-amber-400 opacity-75 blur-sm animate-border-glow" />
+                      <div className="absolute inset-0 rounded-xl animate-platinum-wave">
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-slate-200/20 to-transparent -translate-x-full animate-wave-slide" />
+                      </div>
+                      <div className="absolute -inset-px rounded-xl bg-linear-to-r from-slate-300/40 via-zinc-200/30 to-slate-300/40 opacity-60 blur-[2px]" />
                       <div className="absolute top-0 right-0 -mt-2 -mr-2">
                         <div className="relative">
-                          <div className="absolute inset-0 rounded-full bg-linear-to-r from-amber-400 to-yellow-300 opacity-75 blur-md animate-ping" />
-                          <Badge className="relative border-amber-400/50 bg-linear-to-r from-amber-400 via-yellow-300 to-amber-400 text-amber-950 font-bold text-[10px] shadow-lg px-2 py-1">
+                          <div className="absolute inset-0 rounded-full bg-linear-to-r from-slate-300 to-zinc-200 opacity-50 blur-md animate-ping" />
+                          <Badge className="relative border-slate-300/50 bg-linear-to-r from-slate-100 via-zinc-50 to-slate-100 text-slate-800 font-bold text-[10px] shadow-[0_4px_12px_rgba(148,163,184,0.3)] px-2 py-1">
                             <Crown className="h-3 w-3 mr-1 inline" />
                             RECOMENDADO
                           </Badge>
@@ -217,27 +220,27 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
                       </div>
                     </>
                   )}
-                  <CardHeader className="space-y-3 relative z-10">
+                  <CardHeader className="space-y-2 relative z-10 pb-3">
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className={`text-lg font-bold ${
+                      <CardTitle className={`text-base font-bold ${
                         isFeatured
-                          ? "bg-linear-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent"
+                          ? "bg-linear-to-r from-slate-700 via-zinc-600 to-slate-700 bg-clip-text text-transparent"
                           : "text-foreground"
                       }`}>
                         {plan.nome}
                       </CardTitle>
                     </div>
                     <Badge variant="outline" className={`w-fit text-[11px] ${
-                      isFeatured ? "border-amber-400/50 text-amber-300" : ""
+                      isFeatured ? "border-slate-300/50 text-slate-400" : ""
                     }`}>
                       {plan.duracaoDias} dias de acesso
                     </Badge>
                   </CardHeader>
-                  <CardContent className="space-y-4 relative z-10">
+                  <CardContent className="space-y-3 relative z-10 pt-0">
                     <div>
-                      <div className={`text-3xl font-bold ${
+                      <div className={`text-2xl font-bold ${
                         isFeatured
-                          ? "bg-linear-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent"
+                          ? "bg-linear-to-r from-slate-200 via-zinc-100 to-slate-200 bg-clip-text text-transparent"
                           : "text-foreground"
                       }`}>
                         {formatPrice(plan.precoCentavos)}
@@ -247,13 +250,13 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
                     <Button
                       className={`w-full cursor-pointer font-semibold ${
                         isFeatured
-                          ? "bg-linear-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 hover:via-yellow-500 hover:to-amber-600 text-white shadow-[0_4px_20px_rgba(251,191,36,0.4)] hover:shadow-[0_6px_30px_rgba(251,191,36,0.6)]"
+                          ? "bg-linear-to-r from-slate-600 via-zinc-500 to-slate-600 hover:from-slate-700 hover:via-zinc-600 hover:to-slate-700 text-white shadow-[0_4px_20px_rgba(148,163,184,0.4)] hover:shadow-[0_6px_30px_rgba(148,163,184,0.6)]"
                           : ""
                       }`}
                       onClick={() => handleCheckout(plan.id)}
                       disabled={activePlanId === plan.id}
                     >
-                      {activePlanId === plan.id ? "Gerando QR Code..." : isFeatured ? "🚀 Começar agora" : "Comprar"}
+                      {activePlanId === plan.id ? "Gerando QR Code..." : isFeatured ? "⭐ Começar agora" : "Comprar"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -279,50 +282,44 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
         </div>
 
         {isLoading && plans.length === 0 && (
-          <div className="flex gap-4 overflow-hidden">
+          <div className="flex gap-3 overflow-hidden">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`plan-skeleton-${index}`}
-                className="min-w-62.5 md:min-w-70 rounded-xl border border-border/60 bg-secondary/40 p-6 space-y-4"
+                className="min-w-60 md:min-w-64 rounded-xl border border-border/60 bg-secondary/40 p-4 space-y-3"
               >
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-7 w-full" />
+                <Skeleton className="h-9 w-full" />
               </div>
             ))}
           </div>
         )}
 
-        <div className="rounded-xl border border-amber-500/20 bg-linear-to-br from-amber-500/5 via-transparent to-purple-500/5 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-amber-400 to-yellow-500">
-              <Sparkles className="h-4 w-4 text-white" />
+        <div className="rounded-lg border border-amber-500/20 bg-linear-to-br from-amber-500/5 via-transparent to-purple-500/5 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-br from-amber-400 to-yellow-500">
+              <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="text-base font-bold bg-linear-to-r from-amber-300 to-yellow-200 bg-clip-text text-transparent">
-              Todos os benefícios inclusos
+            <span className="text-sm font-bold bg-linear-to-r from-amber-300 to-yellow-200 bg-clip-text text-transparent">
+              Benefícios inclusos
             </span>
           </div>
-          <ul className="space-y-3">
+          <ul className="grid md:grid-cols-2 gap-x-4 gap-y-2">
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon
               return (
-                <li key={index} className="flex items-start gap-3 group">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 transition-transform group-hover:scale-110">
-                    <Icon className={`h-3.5 w-3.5 ${benefit.color}`} />
+                <li key={index} className="flex items-start gap-2 group">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-linear-to-br from-primary/20 to-primary/10 transition-transform group-hover:scale-110">
+                    <Icon className={`h-3 w-3 ${benefit.color}`} />
                   </div>
-                  <span className="text-sm text-foreground/90 leading-relaxed">{benefit.text}</span>
+                  <span className="text-xs text-foreground/90 leading-snug">{benefit.text}</span>
                 </li>
               )
             })}
           </ul>
         </div>
-
-        <DialogFooter>
-          <Button variant="ghost" className="w-full cursor-pointer" onClick={() => setOpen(false)}>
-            Fechar
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
