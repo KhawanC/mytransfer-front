@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "MePassa",
   },
   openGraph: {
@@ -46,7 +46,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#7c3aed",
+  themeColor: "#1a1a1a",
 }
 
 export default function RootLayout({
