@@ -141,8 +141,8 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
           Aumentar limites
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader className="pb-3">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="pb-3 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-amber-400 via-yellow-400 to-amber-500 shadow-[0_0_20px_rgba(251,191,36,0.4)]">
               <Crown className="h-5 w-5 text-white" />
@@ -158,7 +158,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
           </div>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-3 overflow-y-auto pr-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-400" />
@@ -205,11 +205,11 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
                 >
                   {isFeatured && (
                     <>
-                      <div className="absolute inset-0 rounded-xl animate-platinum-wave">
+                      <div className="absolute inset-0 rounded-xl animate-platinum-wave overflow-hidden">
                         <div className="absolute inset-0 bg-linear-to-r from-transparent via-slate-200/20 to-transparent -translate-x-full animate-wave-slide" />
                       </div>
                       <div className="absolute -inset-px rounded-xl bg-linear-to-r from-slate-300/40 via-zinc-200/30 to-slate-300/40 opacity-60 blur-[2px]" />
-                      <div className="absolute top-0 right-0 -mt-2 -mr-2">
+                      <div className="absolute top-2 right-2">
                         <div className="relative">
                           <div className="absolute inset-0 rounded-full bg-linear-to-r from-slate-300 to-zinc-200 opacity-50 blur-md animate-ping" />
                           <Badge className="relative border-slate-300/50 bg-linear-to-r from-slate-100 via-zinc-50 to-slate-100 text-slate-800 font-bold text-[10px] shadow-[0_4px_12px_rgba(148,163,184,0.3)] px-2 py-1">
