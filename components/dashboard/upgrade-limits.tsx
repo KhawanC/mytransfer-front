@@ -141,7 +141,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
           Aumentar limites
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-h-[90vh] overflow-hidden flex flex-col sm:max-w-3xl lg:max-w-4xl p-4 sm:p-6">
         <DialogHeader className="pb-3 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-amber-400 via-yellow-400 to-amber-500 shadow-[0_0_20px_rgba(251,191,36,0.4)]">
@@ -158,7 +158,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
           </div>
         </DialogHeader>
 
-        <div className="space-y-3 overflow-y-auto pr-1">
+        <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-400" />
@@ -190,14 +190,14 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
 
           <div
             ref={sliderRef}
-            className="flex gap-3 overflow-x-auto pb-2 pr-2 snap-x snap-mandatory scroll-smooth [-webkit-overflow-scrolling:touch] scrollbar-hide"
+            className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 pr-2 snap-x snap-mandatory scroll-smooth [-webkit-overflow-scrolling:touch] scrollbar-hide"
           >
             {plans.map((plan) => {
               const isFeatured = featuredPlanId === plan.id
               return (
                 <Card
                   key={plan.id}
-                  className={`min-w-60 md:min-w-64 snap-start relative transition-all duration-300 overflow-hidden ${
+                  className={`min-w-56 sm:min-w-60 md:min-w-64 snap-start relative transition-all duration-300 overflow-hidden ${
                     isFeatured
                       ? "border-2 border-slate-300/30 bg-linear-to-br from-slate-100/10 via-zinc-50/5 to-slate-100/10 shadow-[0_8px_32px_rgba(148,163,184,0.25),0_0_0_1px_rgba(148,163,184,0.1)] backdrop-blur-sm"
                       : "border border-border/60 bg-linear-to-b from-background to-muted/30 hover:border-border hover:shadow-lg"
