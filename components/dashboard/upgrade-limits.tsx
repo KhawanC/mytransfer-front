@@ -49,7 +49,7 @@ export function UpgradeLimits({ onCheckoutCreated }: UpgradeLimitsProps) {
   const sliderRef = useRef<HTMLDivElement | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const canUpgrade = user?.userType !== "GUEST" && user?.userType !== "PREMIUM"
+  const canUpgrade = user?.userType === "FREE"
 
   const planLabel = useMemo(() => {
     if (plans.length === 0) return ""
